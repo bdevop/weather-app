@@ -117,21 +117,21 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature, tem
             onClick={onToggleForecastMode}
             title={`Switch to ${forecastMode === 'hourly' ? 'daily' : 'hourly'} forecast`}
           >
-            {forecastMode === 'hourly' ? '📅' : '⏰'}
+            {forecastMode === 'hourly' ? '7D' : '24H'}
           </button>
           <button 
             className="collapse-toggle"
             onClick={onToggleCollapse}
             title={isCollapsed ? 'Show details' : 'Hide details'}
           >
-            {isCollapsed ? '▼' : '▲'}
+            {isCollapsed ? '+' : '−'}
           </button>
           <button 
             className={`pin-button ${isPinned ? 'pinned' : ''}`}
             onClick={isPinned ? onUnpin : onPin}
             title={isPinned ? 'Unpin location' : 'Pin location'}
           >
-            {isPinned ? '📌' : '📍'}
+            {isPinned ? '●' : '○'}
           </button>
         </div>
       </div>
@@ -479,34 +479,30 @@ function App() {
               onClick={toggleLayoutMode}
               title={layoutMode === 'stacked' ? 'Switch to side-by-side layout' : 'Switch to stacked layout'}
             >
-              {layoutMode === 'stacked' ? '⬜' : '📋'}
-            </button>
-          )}
-          {pinnedLocations.length > 0 && (
-            <button 
-              className="clear-pins-button" 
-              onClick={() => {
-                setPinnedLocations([]);
-                setPinnedWeatherData({});
-                localStorage.removeItem('weather-app-pinned');
-              }}
-              title="Clear all pinned locations"
-            >
-              🗑️
+              {layoutMode === 'stacked' ? '2' : '1'}
             </button>
           )}
           <button 
             className="refresh-button" 
             onClick={() => refreshWeatherData(true)}
             disabled={refreshing}
+            title="Refresh weather data"
           >
-            {refreshing ? '⟳' : '↻'}
+            {refreshing ? '↻' : '↻'}
           </button>
-          <button className="temp-unit-toggle" onClick={toggleTemperatureUnit}>
+          <button 
+            className="temp-unit-toggle" 
+            onClick={toggleTemperatureUnit}
+            title={`Switch to °${temperatureUnit === 'F' ? 'C' : 'F'}`}
+          >
             °{temperatureUnit}
           </button>
-          <button className="theme-toggle" onClick={toggleTheme}>
-            {theme === 'light' ? '🌙' : '☀️'}
+          <button 
+            className="theme-toggle" 
+            onClick={toggleTheme}
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? '●' : '○'}
           </button>
         </div>
       </div>
@@ -559,7 +555,7 @@ function App() {
                     onClick={() => unpinLocation(locationKey)}
                     title="Unpin location"
                   >
-                    📌
+                    ●
                   </button>
                 </div>
                 <div className="loading">Loading weather data...</div>
