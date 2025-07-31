@@ -184,10 +184,10 @@ function App() {
           />
         ))}
 
-        {weather && !loading && (
+        {weather && !loading && !isLocationPinned(weather.location) && (
           <WeatherCard
             weather={weather}
-            isPinned={isLocationPinned(weather.location)}
+            isPinned={false}
             onPin={() => pinLocation(weather)}
             onUnpin={() => unpinLocation(weather.location)}
           />
