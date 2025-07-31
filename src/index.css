@@ -47,9 +47,10 @@ body {
 }
 
 .container {
-  max-width: 800px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 2rem clamp(1rem, 5vw, 3rem);
+  width: 100%;
 }
 
 .header {
@@ -86,6 +87,13 @@ body {
 
 .search-container {
   margin-bottom: 2rem;
+  max-width: 600px;
+}
+
+@media (min-width: 768px) {
+  .search-container {
+    max-width: 800px;
+  }
 }
 
 .search-input {
@@ -135,6 +143,14 @@ body {
   flex-direction: column;
   gap: 2rem;
   margin-top: 2rem;
+}
+
+@media (min-width: 1200px) {
+  .weather-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+    gap: 2rem;
+  }
 }
 
 .weather-display {
@@ -233,25 +249,39 @@ body {
 }
 
 .hourly-list {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 1rem;
-  overflow-x: auto;
   padding-bottom: 0.5rem;
-  scrollbar-width: thin;
-  scrollbar-color: #e0e0e0 transparent;
 }
 
-.hourly-list::-webkit-scrollbar {
-  height: 6px;
+@media (min-width: 1400px) {
+  .hourly-list {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 0.75rem;
+  }
 }
 
-.hourly-list::-webkit-scrollbar-track {
-  background: transparent;
-}
+@media (max-width: 768px) {
+  .hourly-list {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+  }
+  
+  .hourly-list::-webkit-scrollbar {
+    height: 6px;
+  }
 
-.hourly-list::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 3px;
+  .hourly-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .hourly-list::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+  }
 }
 
 .hourly-item {
@@ -259,9 +289,14 @@ body {
   padding: 1rem;
   border-radius: 6px;
   text-align: center;
-  min-width: 100px;
-  flex-shrink: 0;
   border: 1px solid var(--border-light);
+}
+
+@media (max-width: 768px) {
+  .hourly-item {
+    min-width: 100px;
+    flex-shrink: 0;
+  }
 }
 
 .hourly-time {
