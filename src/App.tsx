@@ -80,9 +80,11 @@ interface WeatherCardProps {
   onUnpin: () => void;
   formatTemperature: (tempC: number) => string;
   temperatureUnit: 'C' | 'F';
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
-const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature, temperatureUnit }: WeatherCardProps) => {
+const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature, temperatureUnit, isCollapsed, onToggleCollapse }: WeatherCardProps) => {
   const getWindSpeed = (speedKph: number) => {
     if (temperatureUnit === 'F') {
       return `${Math.round(speedKph * 0.621371)} mph`;
@@ -104,16 +106,25 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature, tem
     return `${precipMm} mm`;
   };
   return (
-    <div className="weather-display">
+    <div className={`weather-display ${isCollapsed ? 'collapsed-state' : ''}`}>
       <div className="weather-header">
         <h2 className="location-name">{weather.location}</h2>
-        <button 
-          className={`pin-button ${isPinned ? 'pinned' : ''}`}
-          onClick={isPinned ? onUnpin : onPin}
-          title={isPinned ? 'Unpin location' : 'Pin location'}
-        >
-          {isPinned ? '📌' : '📍'}
-        </button>
+        <div className="weather-header-buttons">
+          <button 
+            className="collapse-toggle"
+            onClick={onToggleCollapse}
+            title={isCollapsed ? 'Show details' : 'Hide details'}
+          >
+            {isCollapsed ? '▼' : '▲'}
+          </button>
+          <button 
+            className={`pin-button ${isPinned ? 'pinned' : ''}`}
+            onClick={isPinned ? onUnpin : onPin}
+            title={isPinned ? 'Unpin location' : 'Pin location'}
+          >
+            {isPinned ? '📌' : '📍'}
+          </button>
+        </div>
       </div>
       
       <div className="current-weather">
@@ -125,7 +136,7 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature, tem
         </div>
       </div>
 
-      <div className="weather-metrics">
+      <div className={`weather-metrics ${isCollapsed ? 'collapsed' : 'expanded'}`}>
         <div className="metrics-list">
           <div className="metric-item">
             <span className="metric-label">Humidity</span>
@@ -219,6 +230,10 @@ function App() {
     }
   });
   const [pinnedWeatherData, setPinnedWeatherData] = useState<{[key: string]: WeatherData}>({});
+  const [collapsedCards, setCollapsedCards] = useState<{[key: string]: boolean}>(() => {
+    const savedCollapsed = localStorage.getItem('weather-app-collapsed');
+    return savedCollapsed ? JSON.parse(savedCollapsed) : {};
+  });
   const [temperatureUnit, setTemperatureUnit] = useState<'C' | 'F'>(() => {
     const savedUnit = localStorage.getItem('weather-app-temp-unit');
     return (savedUnit as 'C' | 'F') || 'F';
@@ -245,6 +260,10 @@ function App() {
     localStorage.setItem('weather-app-layout', layoutMode);
   }, [layoutMode]);
 
+  useEffect(() => {
+    localStorage.setItem('weather-app-collapsed', JSON.stringify(collapsedCards));
+  }, [collapsedCards]);
+
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
@@ -255,6 +274,13 @@ function App() {
 
   const toggleLayoutMode = () => {
     setLayoutMode(prev => prev === 'stacked' ? 'side-by-side' : 'stacked');
+  };
+
+  const toggleCardCollapse = (location: string) => {
+    setCollapsedCards(prev => ({
+      ...prev,
+      [location]: !prev[location]
+    }));
   };
 
   const convertTemperature = (tempC: number, unit: 'C' | 'F') => {
@@ -464,7 +490,7 @@ function App() {
       
       {error && <div className="error">{error}</div>}
 
-      <div className={`weather-container ${layoutMode}`}>
+      <div className={`weather-container ${layoutMode} ${Object.values(collapsedCards).some(collapsed => collapsed) ? 'has-collapsed-cards' : ''}`}>
         {pinnedLocations.map((location, index) => {
           // Validate location object
           if (!location || !location.name || !location.country) {
@@ -501,6 +527,8 @@ function App() {
               onUnpin={() => unpinLocation(locationKey)}
               formatTemperature={formatTemperature}
               temperatureUnit={temperatureUnit}
+              isCollapsed={collapsedCards[locationKey] || false}
+              onToggleCollapse={() => toggleCardCollapse(locationKey)}
             />
           );
         }).filter(Boolean)}
@@ -513,6 +541,8 @@ function App() {
             onUnpin={() => unpinLocation(weather.location)}
             formatTemperature={formatTemperature}
             temperatureUnit={temperatureUnit}
+            isCollapsed={collapsedCards[weather.location] || false}
+            onToggleCollapse={() => toggleCardCollapse(weather.location)}
           />
         )}
       </div>
