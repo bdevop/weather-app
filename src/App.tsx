@@ -2,19 +2,75 @@ import { useState, useEffect } from 'react';
 import { Location, WeatherData } from './types';
 import { searchLocations, getWeatherData } from './services/weatherApi';
 
-const getWeatherIcon = (iconCode: string) => {
-  const iconMap: Record<string, string> = {
-    '01d': '☀️', '01n': '🌙',
-    '02d': '⛅', '02n': '⛅',
-    '03d': '☁️', '03n': '☁️',
-    '04d': '☁️', '04n': '☁️',
-    '09d': '🌦️', '09n': '🌦️',
-    '10d': '🌧️', '10n': '🌧️',
-    '11d': '⛈️', '11n': '⛈️',
-    '13d': '❄️', '13n': '❄️',
-    '50d': '🌫️', '50n': '🌫️'
-  };
-  return iconMap[iconCode] || '🌤️';
+const getWeatherIcon = (conditionText: string, iconUrl: string) => {
+  // WeatherAPI.com provides detailed condition text, let's use that for better accuracy
+  const condition = conditionText.toLowerCase();
+  const isNight = iconUrl.includes('/night/');
+  
+  // Clear conditions
+  if (condition.includes('clear') || condition.includes('sunny')) {
+    return isNight ? '🌙' : '☀️';
+  }
+  
+  // Partly cloudy variations
+  if (condition.includes('partly cloudy') || condition.includes('partly overcast')) {
+    return isNight ? '☁️' : '⛅';
+  }
+  
+  // Cloudy conditions
+  if (condition.includes('cloudy') || condition.includes('overcast')) {
+    return '☁️';
+  }
+  
+  // Mist/Fog variations
+  if (condition.includes('mist') || condition.includes('fog') || condition.includes('haze')) {
+    return '🌫️';
+  }
+  
+  // Rain conditions (ordered from heaviest to lightest for better matching)
+  if (condition.includes('heavy rain') || condition.includes('torrential') || condition.includes('moderate rain')) {
+    return '🌧️';
+  }
+  if (condition.includes('patchy rain') || condition.includes('light rain') || condition.includes('drizzle')) {
+    return '🌦️';
+  }
+  if (condition.includes('rain') || condition.includes('shower')) {
+    return '🌧️';
+  }
+  
+  // Thunder/Storm variations
+  if (condition.includes('thunder') || condition.includes('storm') || condition.includes('lightning')) {
+    return '⛈️';
+  }
+  
+  // Snow conditions
+  if (condition.includes('heavy snow') || condition.includes('blizzard')) {
+    return '🌨️';
+  }
+  if (condition.includes('patchy snow') || condition.includes('light snow') || condition.includes('snow')) {
+    return '❄️';
+  }
+  if (condition.includes('sleet') || condition.includes('ice pellets')) {
+    return '🧊';
+  }
+  
+  // Hail
+  if (condition.includes('hail')) {
+    return '🧊';
+  }
+  
+  // Wind conditions
+  if (condition.includes('windy') || condition.includes('gale') || condition.includes('breezy')) {
+    return '💨';
+  }
+  
+  // Freezing conditions
+  if (condition.includes('freezing')) {
+    return '🧊';
+  }
+  
+  // Default fallback
+  return isNight ? '🌙' : '🌤️';
 };
 
 interface WeatherCardProps {
@@ -39,7 +95,7 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin }: WeatherCardProps) =>
       </div>
       
       <div className="current-weather">
-        <div className="weather-icon">{getWeatherIcon(weather.current.icon)}</div>
+        <div className="weather-icon">{getWeatherIcon(weather.current.description, weather.current.icon)}</div>
         <div className="temperature">{weather.current.temp}°C</div>
         <div className="weather-info">
           <div className="weather-description">{weather.current.description}</div>
@@ -53,7 +109,7 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin }: WeatherCardProps) =>
           {weather.hourly.map((hour, index) => (
             <div key={index} className="hourly-item">
               <div className="hourly-time">{hour.time}</div>
-              <div className="hourly-icon">{getWeatherIcon(hour.icon)}</div>
+              <div className="hourly-icon">{getWeatherIcon(hour.description, hour.icon)}</div>
               <div className="hourly-temp">{hour.temp}°C</div>
               <div className="hourly-desc">{hour.description}</div>
             </div>
