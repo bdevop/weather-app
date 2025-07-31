@@ -97,13 +97,6 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature, tem
     return `${visKm} km`;
   };
 
-  const getPressure = (pressureMb: number) => {
-    if (temperatureUnit === 'F') {
-      return `${(pressureMb * 0.02953).toFixed(2)} inHg`;
-    }
-    return `${pressureMb} mb`;
-  };
-
   const getPrecipitation = (precipMm: number) => {
     if (temperatureUnit === 'F') {
       return `${(precipMm * 0.0394).toFixed(2)} in`;
@@ -133,54 +126,35 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature, tem
       </div>
 
       <div className="weather-metrics">
-        <div className="metrics-grid">
+        <div className="metrics-list">
           <div className="metric-item">
-            <div className="metric-icon">💧</div>
-            <div className="metric-label">Humidity</div>
-            <div className="metric-value">{weather.current.humidity}%</div>
+            <span className="metric-label">Humidity</span>
+            <span className="metric-value">{weather.current.humidity}%</span>
           </div>
           
           <div className="metric-item">
-            <div className="metric-icon">🌬️</div>
-            <div className="metric-label">Wind</div>
-            <div className="metric-value">{getWindSpeed(weather.current.windSpeed)}</div>
-            <div className="metric-sublabel">{weather.current.windDirection}</div>
+            <span className="metric-label">Wind</span>
+            <span className="metric-value">{getWindSpeed(weather.current.windSpeed)} {weather.current.windDirection}</span>
           </div>
           
           <div className="metric-item">
-            <div className="metric-icon">🌡️</div>
-            <div className="metric-label">Pressure</div>
-            <div className="metric-value">{getPressure(weather.current.pressure)}</div>
+            <span className="metric-label">Visibility</span>
+            <span className="metric-value">{getVisibility(weather.current.visibility)}</span>
           </div>
           
           <div className="metric-item">
-            <div className="metric-icon">👁️</div>
-            <div className="metric-label">Visibility</div>
-            <div className="metric-value">{getVisibility(weather.current.visibility)}</div>
+            <span className="metric-label">UV Index</span>
+            <span className="metric-value">{weather.current.uvIndex}</span>
           </div>
           
           <div className="metric-item">
-            <div className="metric-icon">☀️</div>
-            <div className="metric-label">UV Index</div>
-            <div className="metric-value">{weather.current.uvIndex}</div>
+            <span className="metric-label">Cloud Cover</span>
+            <span className="metric-value">{weather.current.cloudCover}%</span>
           </div>
           
           <div className="metric-item">
-            <div className="metric-icon">☁️</div>
-            <div className="metric-label">Cloud Cover</div>
-            <div className="metric-value">{weather.current.cloudCover}%</div>
-          </div>
-          
-          <div className="metric-item">
-            <div className="metric-icon">🌧️</div>
-            <div className="metric-label">Precipitation</div>
-            <div className="metric-value">{getPrecipitation(weather.current.precipitation)}</div>
-          </div>
-          
-          <div className="metric-item">
-            <div className="metric-icon">💨</div>
-            <div className="metric-label">Dew Point</div>
-            <div className="metric-value">{formatTemperature(weather.current.dewPoint)}</div>
+            <span className="metric-label">Precipitation</span>
+            <span className="metric-value">{getPrecipitation(weather.current.precipitation)}</span>
           </div>
         </div>
       </div>
