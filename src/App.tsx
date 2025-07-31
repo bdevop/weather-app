@@ -223,6 +223,10 @@ function App() {
     const savedUnit = localStorage.getItem('weather-app-temp-unit');
     return (savedUnit as 'C' | 'F') || 'F';
   });
+  const [layoutMode, setLayoutMode] = useState<'stacked' | 'side-by-side'>(() => {
+    const savedLayout = localStorage.getItem('weather-app-layout');
+    return (savedLayout as 'stacked' | 'side-by-side') || 'stacked';
+  });
 
   useEffect(() => {
     localStorage.setItem('weather-app-theme', theme);
@@ -237,12 +241,20 @@ function App() {
     localStorage.setItem('weather-app-temp-unit', temperatureUnit);
   }, [temperatureUnit]);
 
+  useEffect(() => {
+    localStorage.setItem('weather-app-layout', layoutMode);
+  }, [layoutMode]);
+
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
 
   const toggleTemperatureUnit = () => {
     setTemperatureUnit(prev => prev === 'C' ? 'F' : 'C');
+  };
+
+  const toggleLayoutMode = () => {
+    setLayoutMode(prev => prev === 'stacked' ? 'side-by-side' : 'stacked');
   };
 
   const convertTemperature = (tempC: number, unit: 'C' | 'F') => {
@@ -386,6 +398,15 @@ function App() {
           )}
         </div>
         <div className="header-controls">
+          {pinnedLocations.length > 1 && (
+            <button 
+              className="layout-toggle" 
+              onClick={toggleLayoutMode}
+              title={layoutMode === 'stacked' ? 'Switch to side-by-side layout' : 'Switch to stacked layout'}
+            >
+              {layoutMode === 'stacked' ? '⬜' : '📋'}
+            </button>
+          )}
           {pinnedLocations.length > 0 && (
             <button 
               className="clear-pins-button" 
@@ -443,7 +464,7 @@ function App() {
       
       {error && <div className="error">{error}</div>}
 
-      <div className="weather-container">
+      <div className={`weather-container ${layoutMode}`}>
         {pinnedLocations.map((location, index) => {
           // Validate location object
           if (!location || !location.name || !location.country) {

@@ -85,6 +85,26 @@ body {
   align-items: center;
 }
 
+.layout-toggle {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--text-color);
+  transition: all 0.2s ease;
+}
+
+.layout-toggle:hover {
+  background: var(--hover-bg);
+  transform: scale(1.05);
+}
+
 .clear-pins-button {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -233,11 +253,15 @@ body {
   margin-top: 2rem;
 }
 
-@media (min-width: 1200px) {
-  .weather-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
-    gap: 2rem;
+.weather-container.side-by-side {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 2rem;
+}
+
+@media (max-width: 1200px) {
+  .weather-container.side-by-side {
+    grid-template-columns: 1fr;
   }
 }
 
