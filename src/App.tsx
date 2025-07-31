@@ -78,9 +78,10 @@ interface WeatherCardProps {
   isPinned: boolean;
   onPin: () => void;
   onUnpin: () => void;
+  formatTemperature: (tempC: number) => string;
 }
 
-const WeatherCard = ({ weather, isPinned, onPin, onUnpin }: WeatherCardProps) => {
+const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature }: WeatherCardProps) => {
   return (
     <div className="weather-display">
       <div className="weather-header">
@@ -96,10 +97,10 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin }: WeatherCardProps) =>
       
       <div className="current-weather">
         <div className="weather-icon">{getWeatherIcon(weather.current.description, weather.current.icon)}</div>
-        <div className="temperature">{weather.current.temp}°C</div>
+        <div className="temperature">{formatTemperature(weather.current.temp)}</div>
         <div className="weather-info">
           <div className="weather-description">{weather.current.description}</div>
-          <div className="feels-like">Feels like {weather.current.feels_like}°C</div>
+          <div className="feels-like">Feels like {formatTemperature(weather.current.feels_like)}</div>
         </div>
       </div>
 
@@ -110,7 +111,7 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin }: WeatherCardProps) =>
             <div key={index} className="hourly-item">
               <div className="hourly-time">{hour.time}</div>
               <div className="hourly-icon">{getWeatherIcon(hour.description, hour.icon)}</div>
-              <div className="hourly-temp">{hour.temp}°C</div>
+              <div className="hourly-temp">{formatTemperature(hour.temp)}</div>
               <div className="hourly-desc">{hour.description}</div>
             </div>
           ))}
@@ -134,6 +135,10 @@ function App() {
     const savedPinned = localStorage.getItem('weather-app-pinned');
     return savedPinned ? JSON.parse(savedPinned) : [];
   });
+  const [temperatureUnit, setTemperatureUnit] = useState<'C' | 'F'>(() => {
+    const savedUnit = localStorage.getItem('weather-app-temp-unit');
+    return (savedUnit as 'C' | 'F') || 'F';
+  });
 
   useEffect(() => {
     localStorage.setItem('weather-app-theme', theme);
@@ -144,8 +149,27 @@ function App() {
     localStorage.setItem('weather-app-pinned', JSON.stringify(pinnedWeather));
   }, [pinnedWeather]);
 
+  useEffect(() => {
+    localStorage.setItem('weather-app-temp-unit', temperatureUnit);
+  }, [temperatureUnit]);
+
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
+  const toggleTemperatureUnit = () => {
+    setTemperatureUnit(prev => prev === 'C' ? 'F' : 'C');
+  };
+
+  const convertTemperature = (tempC: number, unit: 'C' | 'F') => {
+    if (unit === 'F') {
+      return Math.round((tempC * 9/5) + 32);
+    }
+    return tempC;
+  };
+
+  const formatTemperature = (tempC: number) => {
+    return `${convertTemperature(tempC, temperatureUnit)}°${temperatureUnit}`;
   };
 
   const pinLocation = (weatherData: WeatherData) => {
@@ -196,9 +220,14 @@ function App() {
     <div className="container">
       <div className="header">
         <h1 className="app-title">Weather</h1>
-        <button className="theme-toggle" onClick={toggleTheme}>
-          {theme === 'light' ? '🌙' : '☀️'}
-        </button>
+        <div className="header-controls">
+          <button className="temp-unit-toggle" onClick={toggleTemperatureUnit}>
+            °{temperatureUnit}
+          </button>
+          <button className="theme-toggle" onClick={toggleTheme}>
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
+        </div>
       </div>
       
       <div className="search-container">
@@ -237,6 +266,7 @@ function App() {
             isPinned={true}
             onPin={() => {}}
             onUnpin={() => unpinLocation(pinnedWeatherData.location)}
+            formatTemperature={formatTemperature}
           />
         ))}
 
@@ -246,6 +276,7 @@ function App() {
             isPinned={false}
             onPin={() => pinLocation(weather)}
             onUnpin={() => unpinLocation(weather.location)}
+            formatTemperature={formatTemperature}
           />
         )}
       </div>

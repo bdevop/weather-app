@@ -66,6 +66,33 @@ body {
   color: var(--text-color);
 }
 
+.header-controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.temp-unit-toggle {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-color);
+  transition: all 0.2s ease;
+  min-width: 44px;
+}
+
+.temp-unit-toggle:hover {
+  background: var(--hover-bg);
+  transform: scale(1.05);
+}
+
 .theme-toggle {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
