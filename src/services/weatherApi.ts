@@ -33,7 +33,7 @@ export const searchLocations = async (query: string): Promise<Location[]> => {
 export const getWeatherData = async (location: Location): Promise<WeatherData> => {
   try {
     const response = await fetch(
-      `${BASE_URL}/forecast.json?key=${API_KEY}&q=${location.lat},${location.lon}&days=2&aqi=no&alerts=no`
+      `${BASE_URL}/forecast.json?key=${API_KEY}&q=${location.lat},${location.lon}&days=7&aqi=no&alerts=no`
     );
     
     if (!response.ok) {
@@ -66,6 +66,22 @@ export const getWeatherData = async (location: Location): Promise<WeatherData> =
         }
       });
     });
+
+    // Get daily forecast data
+    const daily = forecastDays.map((day: any) => ({
+      date: new Date(day.date).toLocaleDateString('en-US', { 
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric'
+      }),
+      tempHigh: Math.round(day.day.maxtemp_c),
+      tempLow: Math.round(day.day.mintemp_c),
+      description: day.day.condition.text,
+      icon: day.day.condition.icon,
+      humidity: day.day.avghumidity,
+      chanceOfRain: day.day.daily_chance_of_rain || 0,
+      windSpeed: Math.round(day.day.maxwind_kph),
+    }));
     
     return {
       location: `${location.name}, ${location.country}`,
@@ -86,6 +102,7 @@ export const getWeatherData = async (location: Location): Promise<WeatherData> =
         dewPoint: Math.round(current.dewpoint_c),
       },
       hourly,
+      daily,
     };
   } catch (error) {
     console.error('Error fetching weather data:', error);

@@ -323,6 +323,27 @@ body {
   transform: scale(1.05);
 }
 
+.forecast-toggle {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.forecast-toggle:hover {
+  background: var(--hover-bg);
+  color: var(--text-color);
+  transform: scale(1.05);
+}
+
 .pin-button {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -467,18 +488,18 @@ body {
   color: var(--text-secondary);
 }
 
-.hourly-forecast {
+.forecast-section {
   margin-top: 2.5rem;
 }
 
-.hourly-title {
+.forecast-title {
   font-size: 1.4rem;
   margin-bottom: 1.5rem;
   color: var(--text-color);
   font-weight: 600;
 }
 
-.hourly-list {
+.forecast-list {
   display: flex;
   gap: 1rem;
   overflow-x: auto;
@@ -487,20 +508,20 @@ body {
   scrollbar-color: var(--border-color) transparent;
 }
 
-.hourly-list::-webkit-scrollbar {
+.forecast-list::-webkit-scrollbar {
   height: 6px;
 }
 
-.hourly-list::-webkit-scrollbar-track {
+.forecast-list::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.hourly-list::-webkit-scrollbar-thumb {
+.forecast-list::-webkit-scrollbar-thumb {
   background: var(--border-color);
   border-radius: 3px;
 }
 
-.hourly-item {
+.forecast-item {
   background: var(--card-bg);
   padding: 1.5rem 1rem;
   border-radius: 8px;
@@ -511,29 +532,61 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.hourly-time {
+.forecast-item.daily-item {
+  min-width: 180px;
+}
+
+.forecast-time {
   font-size: 0.9rem;
   color: var(--text-secondary);
   margin-bottom: 0.75rem;
 }
 
-.hourly-icon {
+.forecast-icon {
   font-size: 1.75rem;
   margin-bottom: 0.75rem;
   line-height: 1;
 }
 
-.hourly-temp {
+.forecast-temp {
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--text-color);
   margin-bottom: 0.5rem;
 }
 
-.hourly-desc {
+.forecast-temp-range {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.temp-high {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.temp-low {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.forecast-desc {
   font-size: 0.8rem;
   color: var(--text-muted);
   text-transform: capitalize;
+  margin-bottom: 0.5rem;
+}
+
+.daily-details {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 .loading {

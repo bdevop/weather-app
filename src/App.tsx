@@ -82,9 +82,11 @@ interface WeatherCardProps {
   temperatureUnit: 'C' | 'F';
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  forecastMode: 'hourly' | 'daily';
+  onToggleForecastMode: () => void;
 }
 
-const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature, temperatureUnit, isCollapsed, onToggleCollapse }: WeatherCardProps) => {
+const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature, temperatureUnit, isCollapsed, onToggleCollapse, forecastMode, onToggleForecastMode }: WeatherCardProps) => {
   const getWindSpeed = (speedKph: number) => {
     if (temperatureUnit === 'F') {
       return `${Math.round(speedKph * 0.621371)} mph`;
@@ -110,6 +112,13 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature, tem
       <div className="weather-header">
         <h2 className="location-name">{weather.location}</h2>
         <div className="weather-header-buttons">
+          <button 
+            className="forecast-toggle"
+            onClick={onToggleForecastMode}
+            title={`Switch to ${forecastMode === 'hourly' ? 'daily' : 'hourly'} forecast`}
+          >
+            {forecastMode === 'hourly' ? '📅' : '⏰'}
+          </button>
           <button 
             className="collapse-toggle"
             onClick={onToggleCollapse}
@@ -170,18 +179,43 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature, tem
         </div>
       </div>
 
-      <div className="hourly-forecast">
-        <h3 className="hourly-title">24-Hour Forecast</h3>
-        <div className="hourly-list">
-          {weather.hourly.map((hour, index) => (
-            <div key={index} className="hourly-item">
-              <div className="hourly-time">{hour.time}</div>
-              <div className="hourly-icon">{getWeatherIcon(hour.description, hour.icon)}</div>
-              <div className="hourly-temp">{formatTemperature(hour.temp)}</div>
-              <div className="hourly-desc">{hour.description}</div>
+      <div className="forecast-section">
+        {forecastMode === 'hourly' ? (
+          <>
+            <h3 className="forecast-title">24-Hour Forecast</h3>
+            <div className="forecast-list">
+              {weather.hourly.map((hour, index) => (
+                <div key={index} className="forecast-item">
+                  <div className="forecast-time">{hour.time}</div>
+                  <div className="forecast-icon">{getWeatherIcon(hour.description, hour.icon)}</div>
+                  <div className="forecast-temp">{formatTemperature(hour.temp)}</div>
+                  <div className="forecast-desc">{hour.description}</div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        ) : (
+          <>
+            <h3 className="forecast-title">7-Day Forecast</h3>
+            <div className="forecast-list">
+              {weather.daily.map((day, index) => (
+                <div key={index} className="forecast-item daily-item">
+                  <div className="forecast-time">{day.date}</div>
+                  <div className="forecast-icon">{getWeatherIcon(day.description, day.icon)}</div>
+                  <div className="forecast-temp-range">
+                    <span className="temp-high">{formatTemperature(day.tempHigh)}</span>
+                    <span className="temp-low">{formatTemperature(day.tempLow)}</span>
+                  </div>
+                  <div className="forecast-desc">{day.description}</div>
+                  <div className="daily-details">
+                    <span>💧 {day.chanceOfRain}%</span>
+                    <span>💨 {temperatureUnit === 'F' ? Math.round(day.windSpeed * 0.621371) + ' mph' : day.windSpeed + ' km/h'}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -234,6 +268,10 @@ function App() {
     const savedCollapsed = localStorage.getItem('weather-app-collapsed');
     return savedCollapsed ? JSON.parse(savedCollapsed) : {};
   });
+  const [forecastModes, setForecastModes] = useState<{[key: string]: 'hourly' | 'daily'}>(() => {
+    const savedModes = localStorage.getItem('weather-app-forecast-modes');
+    return savedModes ? JSON.parse(savedModes) : {};
+  });
   const [temperatureUnit, setTemperatureUnit] = useState<'C' | 'F'>(() => {
     const savedUnit = localStorage.getItem('weather-app-temp-unit');
     return (savedUnit as 'C' | 'F') || 'F';
@@ -264,6 +302,10 @@ function App() {
     localStorage.setItem('weather-app-collapsed', JSON.stringify(collapsedCards));
   }, [collapsedCards]);
 
+  useEffect(() => {
+    localStorage.setItem('weather-app-forecast-modes', JSON.stringify(forecastModes));
+  }, [forecastModes]);
+
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
@@ -280,6 +322,13 @@ function App() {
     setCollapsedCards(prev => ({
       ...prev,
       [location]: !prev[location]
+    }));
+  };
+
+  const toggleForecastMode = (location: string) => {
+    setForecastModes(prev => ({
+      ...prev,
+      [location]: prev[location] === 'daily' ? 'hourly' : 'daily'
     }));
   };
 
@@ -529,6 +578,8 @@ function App() {
               temperatureUnit={temperatureUnit}
               isCollapsed={collapsedCards[locationKey] || false}
               onToggleCollapse={() => toggleCardCollapse(locationKey)}
+              forecastMode={forecastModes[locationKey] || 'hourly'}
+              onToggleForecastMode={() => toggleForecastMode(locationKey)}
             />
           );
         }).filter(Boolean)}
@@ -543,6 +594,8 @@ function App() {
             temperatureUnit={temperatureUnit}
             isCollapsed={collapsedCards[weather.location] || false}
             onToggleCollapse={() => toggleCardCollapse(weather.location)}
+            forecastMode={forecastModes[weather.location] || 'hourly'}
+            onToggleForecastMode={() => toggleForecastMode(weather.location)}
           />
         )}
       </div>

@@ -25,6 +25,7 @@ export interface WeatherData {
     dewPoint: number;
   };
   hourly: HourlyWeather[];
+  daily: DailyWeather[];
 }
 
 export interface HourlyWeather {
@@ -32,4 +33,15 @@ export interface HourlyWeather {
   temp: number;
   description: string;
   icon: string;
+}
+
+export interface DailyWeather {
+  date: string;
+  tempHigh: number;
+  tempLow: number;
+  description: string;
+  icon: string;
+  humidity: number;
+  chanceOfRain: number;
+  windSpeed: number;
 }
