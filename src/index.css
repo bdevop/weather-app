@@ -1,3 +1,31 @@
+:root {
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --text-secondary: #666666;
+  --text-muted: #999999;
+  --border-color: #e0e0e0;
+  --border-light: #f0f0f0;
+  --card-bg: #f8f8f8;
+  --hover-bg: #f5f5f5;
+  --error-bg: #fef7f7;
+  --error-border: #ffcdd2;
+  --error-text: #d32f2f;
+}
+
+[data-theme="dark"] {
+  --bg-color: #1a1a1a;
+  --text-color: #ffffff;
+  --text-secondary: #cccccc;
+  --text-muted: #999999;
+  --border-color: #333333;
+  --border-light: #2a2a2a;
+  --card-bg: #252525;
+  --hover-bg: #2a2a2a;
+  --error-bg: #2a1a1a;
+  --error-border: #4a2a2a;
+  --error-text: #ff6b6b;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -6,27 +34,54 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+  background: var(--bg-color);
   min-height: 100vh;
-  color: #2d3436;
+  color: var(--text-color);
+  line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   padding: 20px;
 }
 
 .container {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
   max-width: 800px;
-  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.app-title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.theme-toggle {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--hover-bg);
+  transform: scale(1.05);
 }
 
 .search-container {
@@ -36,35 +91,39 @@ body {
 .search-input {
   width: 100%;
   padding: 1rem;
-  border: 2px solid #e1e8ed;
-  border-radius: 12px;
-  font-size: 1.1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
   outline: none;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.2s ease;
+  background: var(--bg-color);
+  color: var(--text-color);
 }
 
 .search-input:focus {
-  border-color: #74b9ff;
+  border-color: var(--text-secondary);
 }
 
 .locations-list {
-  margin-top: 1rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  margin-top: 0.5rem;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
   max-height: 200px;
   overflow-y: auto;
 }
 
 .location-item {
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   cursor: pointer;
-  border-bottom: 1px solid #f1f3f4;
+  border-bottom: 1px solid var(--border-light);
   transition: background-color 0.2s ease;
+  font-size: 0.95rem;
+  color: var(--text-color);
 }
 
 .location-item:hover {
-  background-color: #f8f9fa;
+  background-color: var(--hover-bg);
 }
 
 .location-item:last-child {
@@ -72,42 +131,52 @@ body {
 }
 
 .weather-display {
-  text-align: center;
+  text-align: left;
+  margin-top: 2rem;
 }
 
 .location-name {
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #2d3436;
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  color: var(--text-color);
 }
 
 .current-weather {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.weather-icon {
+  font-size: 3.5rem;
+  line-height: 1;
 }
 
 .temperature {
-  font-size: 3rem;
+  font-size: 4rem;
   font-weight: 300;
-  color: #0984e3;
+  color: var(--text-color);
+  line-height: 1;
 }
 
 .weather-info {
   text-align: left;
+  margin-top: 0.5rem;
 }
 
 .weather-description {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   text-transform: capitalize;
   margin-bottom: 0.5rem;
+  color: var(--text-secondary);
 }
 
 .feels-like {
-  color: #636e72;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -116,54 +185,83 @@ body {
 }
 
 .hourly-title {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   margin-bottom: 1rem;
-  color: #2d3436;
+  color: var(--text-color);
+  font-weight: 500;
 }
 
 .hourly-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  display: flex;
   gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: #e0e0e0 transparent;
+}
+
+.hourly-list::-webkit-scrollbar {
+  height: 6px;
+}
+
+.hourly-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hourly-list::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
 }
 
 .hourly-item {
-  background: rgba(116, 185, 255, 0.1);
+  background: var(--card-bg);
   padding: 1rem;
-  border-radius: 12px;
+  border-radius: 6px;
   text-align: center;
+  min-width: 100px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-light);
 }
 
 .hourly-time {
-  font-size: 0.9rem;
-  color: #636e72;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
   margin-bottom: 0.5rem;
 }
 
+.hourly-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
 .hourly-temp {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #0984e3;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-color);
   margin-bottom: 0.5rem;
 }
 
 .hourly-desc {
-  font-size: 0.8rem;
-  color: #636e72;
+  font-size: 0.75rem;
+  color: var(--text-muted);
   text-transform: capitalize;
 }
 
 .loading {
   text-align: center;
-  color: #636e72;
-  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 2rem 0;
 }
 
 .error {
   text-align: center;
-  color: #e17055;
-  font-size: 1.1rem;
+  color: var(--error-text);
+  font-size: 1rem;
   padding: 1rem;
-  background: rgba(225, 112, 85, 0.1);
-  border-radius: 12px;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-radius: 4px;
+  margin: 1rem 0;
 }

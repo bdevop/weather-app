@@ -2,12 +2,40 @@ import { useState, useEffect } from 'react';
 import { Location, WeatherData } from './types';
 import { searchLocations, getWeatherData } from './services/weatherApi';
 
+const getWeatherIcon = (iconCode: string) => {
+  const iconMap: Record<string, string> = {
+    '01d': '☀️', '01n': '🌙',
+    '02d': '⛅', '02n': '⛅',
+    '03d': '☁️', '03n': '☁️',
+    '04d': '☁️', '04n': '☁️',
+    '09d': '🌦️', '09n': '🌦️',
+    '10d': '🌧️', '10n': '🌧️',
+    '11d': '⛈️', '11n': '⛈️',
+    '13d': '❄️', '13n': '❄️',
+    '50d': '🌫️', '50n': '🌫️'
+  };
+  return iconMap[iconCode] || '🌤️';
+};
+
 function App() {
   const [query, setQuery] = useState('');
   const [locations, setLocations] = useState<Location[]>([]);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const savedTheme = localStorage.getItem('weather-app-theme');
+    return (savedTheme as 'light' | 'dark') || 'light';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('weather-app-theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
 
   useEffect(() => {
     const delayedSearch = setTimeout(async () => {
@@ -40,6 +68,13 @@ function App() {
 
   return (
     <div className="container">
+      <div className="header">
+        <h1 className="app-title">Weather</h1>
+        <button className="theme-toggle" onClick={toggleTheme}>
+          {theme === 'light' ? '🌙' : '☀️'}
+        </button>
+      </div>
+      
       <div className="search-container">
         <input
           type="text"
@@ -73,6 +108,7 @@ function App() {
           <h2 className="location-name">{weather.location}</h2>
           
           <div className="current-weather">
+            <div className="weather-icon">{getWeatherIcon(weather.current.icon)}</div>
             <div className="temperature">{weather.current.temp}°C</div>
             <div className="weather-info">
               <div className="weather-description">{weather.current.description}</div>
@@ -86,6 +122,7 @@ function App() {
               {weather.hourly.map((hour, index) => (
                 <div key={index} className="hourly-item">
                   <div className="hourly-time">{hour.time}</div>
+                  <div className="hourly-icon">{getWeatherIcon(hour.icon)}</div>
                   <div className="hourly-temp">{hour.temp}°C</div>
                   <div className="hourly-desc">{hour.description}</div>
                 </div>
