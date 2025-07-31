@@ -1,0 +1,169 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+  min-height: 100vh;
+  color: #2d3436;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  max-width: 800px;
+  width: 100%;
+}
+
+.search-container {
+  margin-bottom: 2rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #e1e8ed;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: #74b9ff;
+}
+
+.locations-list {
+  margin-top: 1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.location-item {
+  padding: 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f3f4;
+  transition: background-color 0.2s ease;
+}
+
+.location-item:hover {
+  background-color: #f8f9fa;
+}
+
+.location-item:last-child {
+  border-bottom: none;
+}
+
+.weather-display {
+  text-align: center;
+}
+
+.location-name {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #2d3436;
+}
+
+.current-weather {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.temperature {
+  font-size: 3rem;
+  font-weight: 300;
+  color: #0984e3;
+}
+
+.weather-info {
+  text-align: left;
+}
+
+.weather-description {
+  font-size: 1.2rem;
+  text-transform: capitalize;
+  margin-bottom: 0.5rem;
+}
+
+.feels-like {
+  color: #636e72;
+  font-size: 0.9rem;
+}
+
+.hourly-forecast {
+  margin-top: 2rem;
+}
+
+.hourly-title {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: #2d3436;
+}
+
+.hourly-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.hourly-item {
+  background: rgba(116, 185, 255, 0.1);
+  padding: 1rem;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.hourly-time {
+  font-size: 0.9rem;
+  color: #636e72;
+  margin-bottom: 0.5rem;
+}
+
+.hourly-temp {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0984e3;
+  margin-bottom: 0.5rem;
+}
+
+.hourly-desc {
+  font-size: 0.8rem;
+  color: #636e72;
+  text-transform: capitalize;
+}
+
+.loading {
+  text-align: center;
+  color: #636e72;
+  font-size: 1.1rem;
+}
+
+.error {
+  text-align: center;
+  color: #e17055;
+  font-size: 1.1rem;
+  padding: 1rem;
+  background: rgba(225, 112, 85, 0.1);
+  border-radius: 12px;
+}
