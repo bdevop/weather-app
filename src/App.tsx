@@ -115,21 +115,21 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature, tem
           <button 
             className="forecast-toggle"
             onClick={onToggleForecastMode}
-            title={`Switch to ${forecastMode === 'hourly' ? 'daily' : 'hourly'} forecast`}
+            data-tooltip={`Switch to ${forecastMode === 'hourly' ? 'daily' : 'hourly'} forecast`}
           >
             {forecastMode === 'hourly' ? '7D' : '24H'}
           </button>
           <button 
             className="collapse-toggle"
             onClick={onToggleCollapse}
-            title={isCollapsed ? 'Show details' : 'Hide details'}
+            data-tooltip={isCollapsed ? 'Show details' : 'Hide details'}
           >
             {isCollapsed ? '+' : '−'}
           </button>
           <button 
             className={`pin-button ${isPinned ? 'pinned' : ''}`}
             onClick={isPinned ? onUnpin : onPin}
-            title={isPinned ? 'Unpin location' : 'Pin location'}
+            data-tooltip={isPinned ? 'Unpin location' : 'Pin location'}
           >
             {isPinned ? '●' : '○'}
           </button>
@@ -477,7 +477,7 @@ function App() {
             <button 
               className="layout-toggle" 
               onClick={toggleLayoutMode}
-              title={layoutMode === 'stacked' ? 'Switch to side-by-side layout' : 'Switch to stacked layout'}
+              data-tooltip={layoutMode === 'stacked' ? 'Switch to side-by-side layout' : 'Switch to stacked layout'}
             >
               {layoutMode === 'stacked' ? '2' : '1'}
             </button>
@@ -486,21 +486,21 @@ function App() {
             className="refresh-button" 
             onClick={() => refreshWeatherData(true)}
             disabled={refreshing}
-            title="Refresh weather data"
+            data-tooltip="Refresh weather data"
           >
             {refreshing ? '↻' : '↻'}
           </button>
           <button 
             className="temp-unit-toggle" 
             onClick={toggleTemperatureUnit}
-            title={`Switch to °${temperatureUnit === 'F' ? 'C' : 'F'}`}
+            data-tooltip={`Switch to °${temperatureUnit === 'F' ? 'C' : 'F'}`}
           >
             °{temperatureUnit}
           </button>
           <button 
             className="theme-toggle" 
             onClick={toggleTheme}
-            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            data-tooltip={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
           >
             {theme === 'light' ? '●' : '○'}
           </button>
@@ -553,7 +553,7 @@ function App() {
                   <button 
                     className="pin-button pinned"
                     onClick={() => unpinLocation(locationKey)}
-                    title="Unpin location"
+                    data-tooltip="Unpin location"
                   >
                     ●
                   </button>
