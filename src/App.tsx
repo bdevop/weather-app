@@ -72,7 +72,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const savedTheme = localStorage.getItem('weather-app-theme');
-    return (savedTheme as 'light' | 'dark') || 'light';
+    return (savedTheme as 'light' | 'dark') || 'dark';
   });
   const [pinnedWeather, setPinnedWeather] = useState<WeatherData[]>(() => {
     const savedPinned = localStorage.getItem('weather-app-pinned');
