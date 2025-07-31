@@ -79,9 +79,37 @@ interface WeatherCardProps {
   onPin: () => void;
   onUnpin: () => void;
   formatTemperature: (tempC: number) => string;
+  temperatureUnit: 'C' | 'F';
 }
 
-const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature }: WeatherCardProps) => {
+const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature, temperatureUnit }: WeatherCardProps) => {
+  const getWindSpeed = (speedKph: number) => {
+    if (temperatureUnit === 'F') {
+      return `${Math.round(speedKph * 0.621371)} mph`;
+    }
+    return `${speedKph} km/h`;
+  };
+
+  const getVisibility = (visKm: number) => {
+    if (temperatureUnit === 'F') {
+      return `${Math.round(visKm * 0.621371)} mi`;
+    }
+    return `${visKm} km`;
+  };
+
+  const getPressure = (pressureMb: number) => {
+    if (temperatureUnit === 'F') {
+      return `${(pressureMb * 0.02953).toFixed(2)} inHg`;
+    }
+    return `${pressureMb} mb`;
+  };
+
+  const getPrecipitation = (precipMm: number) => {
+    if (temperatureUnit === 'F') {
+      return `${(precipMm * 0.0394).toFixed(2)} in`;
+    }
+    return `${precipMm} mm`;
+  };
   return (
     <div className="weather-display">
       <div className="weather-header">
@@ -101,6 +129,59 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature }: W
         <div className="weather-info">
           <div className="weather-description">{weather.current.description}</div>
           <div className="feels-like">Feels like {formatTemperature(weather.current.feels_like)}</div>
+        </div>
+      </div>
+
+      <div className="weather-metrics">
+        <div className="metrics-grid">
+          <div className="metric-item">
+            <div className="metric-icon">💧</div>
+            <div className="metric-label">Humidity</div>
+            <div className="metric-value">{weather.current.humidity}%</div>
+          </div>
+          
+          <div className="metric-item">
+            <div className="metric-icon">🌬️</div>
+            <div className="metric-label">Wind</div>
+            <div className="metric-value">{getWindSpeed(weather.current.windSpeed)}</div>
+            <div className="metric-sublabel">{weather.current.windDirection}</div>
+          </div>
+          
+          <div className="metric-item">
+            <div className="metric-icon">🌡️</div>
+            <div className="metric-label">Pressure</div>
+            <div className="metric-value">{getPressure(weather.current.pressure)}</div>
+          </div>
+          
+          <div className="metric-item">
+            <div className="metric-icon">👁️</div>
+            <div className="metric-label">Visibility</div>
+            <div className="metric-value">{getVisibility(weather.current.visibility)}</div>
+          </div>
+          
+          <div className="metric-item">
+            <div className="metric-icon">☀️</div>
+            <div className="metric-label">UV Index</div>
+            <div className="metric-value">{weather.current.uvIndex}</div>
+          </div>
+          
+          <div className="metric-item">
+            <div className="metric-icon">☁️</div>
+            <div className="metric-label">Cloud Cover</div>
+            <div className="metric-value">{weather.current.cloudCover}%</div>
+          </div>
+          
+          <div className="metric-item">
+            <div className="metric-icon">🌧️</div>
+            <div className="metric-label">Precipitation</div>
+            <div className="metric-value">{getPrecipitation(weather.current.precipitation)}</div>
+          </div>
+          
+          <div className="metric-item">
+            <div className="metric-icon">💨</div>
+            <div className="metric-label">Dew Point</div>
+            <div className="metric-value">{formatTemperature(weather.current.dewPoint)}</div>
+          </div>
         </div>
       </div>
 
@@ -125,16 +206,45 @@ function App() {
   const [query, setQuery] = useState('');
   const [locations, setLocations] = useState<Location[]>([]);
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const savedTheme = localStorage.getItem('weather-app-theme');
     return (savedTheme as 'light' | 'dark') || 'dark';
   });
-  const [pinnedWeather, setPinnedWeather] = useState<WeatherData[]>(() => {
+  const [pinnedLocations, setPinnedLocations] = useState<Location[]>(() => {
     const savedPinned = localStorage.getItem('weather-app-pinned');
-    return savedPinned ? JSON.parse(savedPinned) : [];
+    if (!savedPinned) return [];
+    
+    try {
+      const parsed = JSON.parse(savedPinned);
+      
+      // Check if this is old weather data format (has 'current' property)
+      if (parsed.length > 0 && parsed[0].current) {
+        console.log('Migrating old pinned weather data to new format...');
+        // Clear old format and start fresh
+        localStorage.removeItem('weather-app-pinned');
+        return [];
+      }
+      
+      // Check if it's already in the correct location format
+      if (parsed.length > 0 && parsed[0].name && parsed[0].country) {
+        return parsed;
+      }
+      
+      // Unknown format, clear it
+      localStorage.removeItem('weather-app-pinned');
+      return [];
+    } catch (err) {
+      console.error('Error parsing pinned locations:', err);
+      localStorage.removeItem('weather-app-pinned');
+      return [];
+    }
   });
+  const [pinnedWeatherData, setPinnedWeatherData] = useState<{[key: string]: WeatherData}>({});
   const [temperatureUnit, setTemperatureUnit] = useState<'C' | 'F'>(() => {
     const savedUnit = localStorage.getItem('weather-app-temp-unit');
     return (savedUnit as 'C' | 'F') || 'F';
@@ -146,8 +256,8 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
-    localStorage.setItem('weather-app-pinned', JSON.stringify(pinnedWeather));
-  }, [pinnedWeather]);
+    localStorage.setItem('weather-app-pinned', JSON.stringify(pinnedLocations));
+  }, [pinnedLocations]);
 
   useEffect(() => {
     localStorage.setItem('weather-app-temp-unit', temperatureUnit);
@@ -172,19 +282,75 @@ function App() {
     return `${convertTemperature(tempC, temperatureUnit)}°${temperatureUnit}`;
   };
 
-  const pinLocation = (weatherData: WeatherData) => {
-    const isAlreadyPinned = pinnedWeather.some(pinned => pinned.location === weatherData.location);
+  const pinLocation = () => {
+    if (!currentLocation) return;
+    
+    const isAlreadyPinned = pinnedLocations.some(pinned => 
+      pinned.name === currentLocation.name && pinned.country === currentLocation.country
+    );
+    
     if (!isAlreadyPinned) {
-      setPinnedWeather(prev => [...prev, weatherData]);
+      setPinnedLocations(prev => [...prev, currentLocation]);
     }
   };
 
   const unpinLocation = (location: string) => {
-    setPinnedWeather(prev => prev.filter(pinned => pinned.location !== location));
+    setPinnedLocations(prev => prev.filter(pinned => 
+      `${pinned.name}, ${pinned.country}` !== location
+    ));
+    // Also remove from weather data cache
+    setPinnedWeatherData(prev => {
+      const newData = { ...prev };
+      delete newData[location];
+      return newData;
+    });
   };
 
   const isLocationPinned = (location: string) => {
-    return pinnedWeather.some(pinned => pinned.location === location);
+    return pinnedLocations.some(pinned => 
+      `${pinned.name}, ${pinned.country}` === location
+    );
+  };
+
+  const refreshWeatherData = async (manual = false) => {
+    if (manual) setRefreshing(true);
+    
+    try {
+      // Refresh current weather if available
+      if (currentLocation) {
+        try {
+          const weatherData = await getWeatherData(currentLocation);
+          setWeather(weatherData);
+        } catch (err) {
+          console.error('Failed to refresh current weather:', err);
+        }
+      }
+
+      // Refresh all pinned locations
+      const refreshPromises = pinnedLocations.map(async (location) => {
+        try {
+          const weatherData = await getWeatherData(location);
+          return { location: `${location.name}, ${location.country}`, weatherData };
+        } catch (err) {
+          console.error(`Failed to refresh weather for ${location.name}:`, err);
+          return null;
+        }
+      });
+
+      const results = await Promise.all(refreshPromises);
+      const newPinnedWeatherData: {[key: string]: WeatherData} = {};
+      
+      results.forEach(result => {
+        if (result) {
+          newPinnedWeatherData[result.location] = result.weatherData;
+        }
+      });
+
+      setPinnedWeatherData(newPinnedWeatherData);
+      setLastRefresh(new Date());
+    } finally {
+      if (manual) setRefreshing(false);
+    }
   };
 
   useEffect(() => {
@@ -200,6 +366,23 @@ function App() {
     return () => clearTimeout(delayedSearch);
   }, [query]);
 
+  // Load weather data for pinned locations on mount and when pinned locations change
+  useEffect(() => {
+    console.log('Pinned locations changed:', pinnedLocations);
+    if (pinnedLocations.length > 0) {
+      refreshWeatherData();
+    }
+  }, [pinnedLocations]);
+
+  // Auto-refresh weather data every 10 minutes
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      refreshWeatherData();
+    }, 10 * 60 * 1000); // 10 minutes
+
+    return () => clearInterval(refreshInterval);
+  }, [currentLocation, pinnedLocations]);
+
   const handleLocationSelect = async (location: Location) => {
     setLoading(true);
     setError(null);
@@ -209,6 +392,7 @@ function App() {
     try {
       const weatherData = await getWeatherData(location);
       setWeather(weatherData);
+      setCurrentLocation(location);
     } catch (err) {
       setError('Failed to load weather data. Please try again.');
     } finally {
@@ -219,8 +403,35 @@ function App() {
   return (
     <div className="container">
       <div className="header">
-        <h1 className="app-title">Weather</h1>
+        <div className="header-left">
+          <h1 className="app-title">Weather</h1>
+          {lastRefresh && (
+            <div className="last-refresh">
+              Updated {lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
+          )}
+        </div>
         <div className="header-controls">
+          {pinnedLocations.length > 0 && (
+            <button 
+              className="clear-pins-button" 
+              onClick={() => {
+                setPinnedLocations([]);
+                setPinnedWeatherData({});
+                localStorage.removeItem('weather-app-pinned');
+              }}
+              title="Clear all pinned locations"
+            >
+              🗑️
+            </button>
+          )}
+          <button 
+            className="refresh-button" 
+            onClick={() => refreshWeatherData(true)}
+            disabled={refreshing}
+          >
+            {refreshing ? '⟳' : '↻'}
+          </button>
           <button className="temp-unit-toggle" onClick={toggleTemperatureUnit}>
             °{temperatureUnit}
           </button>
@@ -259,24 +470,54 @@ function App() {
       {error && <div className="error">{error}</div>}
 
       <div className="weather-container">
-        {pinnedWeather.map((pinnedWeatherData, index) => (
-          <WeatherCard
-            key={`pinned-${index}`}
-            weather={pinnedWeatherData}
-            isPinned={true}
-            onPin={() => {}}
-            onUnpin={() => unpinLocation(pinnedWeatherData.location)}
-            formatTemperature={formatTemperature}
-          />
-        ))}
+        {pinnedLocations.map((location, index) => {
+          // Validate location object
+          if (!location || !location.name || !location.country) {
+            return null;
+          }
+          
+          const locationKey = `${location.name}, ${location.country}`;
+          const weatherData = pinnedWeatherData[locationKey];
+          
+          if (!weatherData) {
+            return (
+              <div key={`pinned-loading-${index}`} className="weather-display">
+                <div className="weather-header">
+                  <h2 className="location-name">{locationKey}</h2>
+                  <button 
+                    className="pin-button pinned"
+                    onClick={() => unpinLocation(locationKey)}
+                    title="Unpin location"
+                  >
+                    📌
+                  </button>
+                </div>
+                <div className="loading">Loading weather data...</div>
+              </div>
+            );
+          }
+
+          return (
+            <WeatherCard
+              key={`pinned-${index}`}
+              weather={weatherData}
+              isPinned={true}
+              onPin={() => {}}
+              onUnpin={() => unpinLocation(locationKey)}
+              formatTemperature={formatTemperature}
+              temperatureUnit={temperatureUnit}
+            />
+          );
+        }).filter(Boolean)}
 
         {weather && !loading && !isLocationPinned(weather.location) && (
           <WeatherCard
             weather={weather}
             isPinned={false}
-            onPin={() => pinLocation(weather)}
+            onPin={pinLocation}
             onUnpin={() => unpinLocation(weather.location)}
             formatTemperature={formatTemperature}
+            temperatureUnit={temperatureUnit}
           />
         )}
       </div>

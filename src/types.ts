@@ -13,6 +13,16 @@ export interface WeatherData {
     feels_like: number;
     description: string;
     icon: string;
+    humidity: number;
+    pressure: number;
+    windSpeed: number;
+    windDirection: string;
+    windDegree: number;
+    visibility: number;
+    uvIndex: number;
+    cloudCover: number;
+    precipitation: number;
+    dewPoint: number;
   };
   hourly: HourlyWeather[];
 }

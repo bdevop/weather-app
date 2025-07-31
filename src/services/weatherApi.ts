@@ -42,6 +42,7 @@ export const getWeatherData = async (location: Location): Promise<WeatherData> =
     
     const data = await response.json();
     
+    
     const current = data.current;
     const forecastDays = data.forecast.forecastday;
     
@@ -73,6 +74,16 @@ export const getWeatherData = async (location: Location): Promise<WeatherData> =
         feels_like: Math.round(current.feelslike_c),
         description: current.condition.text,
         icon: current.condition.icon,
+        humidity: current.humidity,
+        pressure: Math.round(current.pressure_mb),
+        windSpeed: Math.round(current.wind_kph),
+        windDirection: current.wind_dir,
+        windDegree: current.wind_degree,
+        visibility: Math.round(current.vis_km),
+        uvIndex: current.uv,
+        cloudCover: current.cloud,
+        precipitation: current.precip_mm || 0,
+        dewPoint: Math.round(current.dewpoint_c),
       },
       hourly,
     };
