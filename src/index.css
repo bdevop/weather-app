@@ -132,48 +132,58 @@ body {
 }
 
 .layout-toggle {
-  background: var(--card-bg);
+  background: transparent;
   border: 1px solid var(--border-color);
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: var(--text-color);
+  opacity: 0.8;
   transition: all 0.2s ease;
 }
 
 .layout-toggle:hover {
-  background: var(--hover-bg);
-  transform: scale(1.05);
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .layout-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 
 .refresh-button {
-  background: var(--card-bg);
+  background: transparent;
   border: 1px solid var(--border-color);
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   color: var(--text-color);
+  opacity: 0.8;
   transition: all 0.2s ease;
 }
 
 .refresh-button:hover:not(:disabled) {
-  background: var(--hover-bg);
-  transform: scale(1.05);
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .refresh-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .refresh-button:disabled {
-  opacity: 0.6;
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
@@ -187,43 +197,54 @@ body {
 }
 
 .temp-unit-toggle {
-  background: var(--card-bg);
+  background: transparent;
   border: 1px solid var(--border-color);
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-color);
+  opacity: 0.8;
   transition: all 0.2s ease;
 }
 
 .temp-unit-toggle:hover {
-  background: var(--hover-bg);
-  transform: scale(1.05);
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .temp-unit-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .theme-toggle {
-  background: var(--card-bg);
+  background: transparent;
   border: 1px solid var(--border-color);
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  color: var(--text-color);
+  opacity: 0.8;
   transition: all 0.2s ease;
 }
 
 .theme-toggle:hover {
-  background: var(--hover-bg);
-  transform: scale(1.05);
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .search-container {
@@ -321,6 +342,8 @@ body {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  margin-right: 12px;
+  margin-top: 0.5rem;
 }
 
 .location-name {
@@ -331,71 +354,138 @@ body {
 }
 
 .collapse-toggle {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 50%;
+  position: absolute;
+  top: 128px;
+  right: 8px;
   width: 32px;
   height: 32px;
+  cursor: pointer;
+  z-index: 5;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 300;
-  color: var(--text-secondary);
+  opacity: 0.8;
   transition: all 0.2s ease;
 }
 
 .collapse-toggle:hover {
-  background: var(--hover-bg);
-  color: var(--text-color);
-  transform: scale(1.05);
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .collapse-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .forecast-toggle {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 50%;
+  position: absolute;
+  top: 88px;
+  right: 8px;
   width: 32px;
   height: 32px;
+  cursor: pointer;
+  z-index: 5;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+  opacity: 0.8;
   transition: all 0.2s ease;
 }
 
 .forecast-toggle:hover {
-  background: var(--hover-bg);
-  color: var(--text-color);
-  transform: scale(1.05);
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .forecast-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .pin-button {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  z-index: 5;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  font-size: 1rem;
+  opacity: 0.8;
   transition: all 0.2s ease;
+  font-size: 16px;
 }
 
 .pin-button:hover {
-  background: var(--hover-bg);
-  transform: scale(1.05);
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .pin-button:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .pin-button.pinned {
+  opacity: 0.8;
+  color: var(--text-color);
+}
+
+.pin-icon {
+  width: 12px;
+  height: 16px;
+  position: relative;
+}
+
+.pin-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  background: var(--text-secondary);
+  border-radius: 50%;
+  border: 1px solid var(--text-secondary);
+}
+
+.pin-icon::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 8px;
+  background: var(--text-secondary);
+}
+
+.pin-button.pinned .pin-icon::before,
+.pin-button.pinned .pin-icon::after {
   background: var(--text-color);
-  color: var(--bg-color);
+  border-color: var(--text-color);
+}
+
+.collapse-toggle {
+  font-size: 1rem;
+  font-weight: 300;
+  color: var(--text-color);
+}
+
+.forecast-toggle {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-color);
 }
 
 .close-button {
@@ -445,6 +535,96 @@ body {
   color: var(--error-text);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
+
+.drag-handle {
+  position: absolute;
+  top: 48px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  cursor: grab;
+  z-index: 5;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+}
+
+.drag-handle:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .drag-handle:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.drag-dots {
+  display: grid;
+  grid-template-columns: repeat(3, 4px);
+  grid-template-rows: repeat(3, 4px);
+  gap: 3px;
+}
+
+.drag-dots span {
+  width: 4px;
+  height: 4px;
+  background: var(--text-color);
+  border-radius: 50%;
+}
+
+/* Visual feedback during drag */
+.weather-display:hover .drag-handle {
+  opacity: 0.8;
+}
+
+/* Make drag handle more visible when needed */
+.weather-container:hover .drag-handle {
+  opacity: 0.6;
+}
+
+.weather-droppable-area {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.weather-droppable-area.has-collapsed-cards {
+  gap: 1.5rem;
+}
+
+.weather-droppable-area.side-by-side {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 2rem;
+}
+
+@media (max-width: 1200px) {
+  .weather-droppable-area.side-by-side {
+    grid-template-columns: 1fr;
+  }
+}
+
+.weather-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  min-height: 200px; /* Minimum height for empty columns */
+  position: relative;
+}
+
+.weather-droppable-area.side-by-side .weather-column.has-collapsed-cards {
+  gap: 1.5rem;
+}
+
 
 .current-weather {
   display: flex;

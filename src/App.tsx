@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Location, WeatherData } from './types';
 import { searchLocations, getWeatherData } from './services/weatherApi';
 
@@ -79,6 +80,7 @@ interface WeatherCardProps {
   onPin: () => void;
   onUnpin: () => void;
   onClose?: () => void;
+  onDragHandle?: any;
   formatTemperature: (tempC: number) => string;
   temperatureUnit: 'C' | 'F';
   isCollapsed: boolean;
@@ -87,7 +89,7 @@ interface WeatherCardProps {
   onToggleForecastMode: () => void;
 }
 
-const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, formatTemperature, temperatureUnit, isCollapsed, onToggleCollapse, forecastMode, onToggleForecastMode }: WeatherCardProps) => {
+const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, onDragHandle, formatTemperature, temperatureUnit, isCollapsed, onToggleCollapse, forecastMode, onToggleForecastMode }: WeatherCardProps) => {
   const getWindSpeed = (speedKph: number) => {
     if (temperatureUnit === 'F') {
       return `${Math.round(speedKph * 0.621371)} mph`;
@@ -120,33 +122,46 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, formatTempera
           ✕
         </button>
       )}
+      {onDragHandle && (
+        <div 
+          {...onDragHandle}
+          className="drag-handle"
+          data-tooltip="Drag to reorder"
+        >
+          <div className="drag-dots">
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      )}
+      <button 
+        type="button"
+        className={`pin-button ${isPinned ? 'pinned' : ''}`}
+        onClick={isPinned ? onUnpin : onPin}
+        data-tooltip={isPinned ? 'Unpin location' : 'Pin location'}
+      >
+        <div className="pin-icon"></div>
+      </button>
+      <button 
+        type="button"
+        className="collapse-toggle"
+        onClick={onToggleCollapse}
+        data-tooltip={isCollapsed ? 'Show details' : 'Hide details'}
+      >
+        {isCollapsed ? '+' : '−'}
+      </button>
+      <button 
+        type="button"
+        className="forecast-toggle"
+        onClick={onToggleForecastMode}
+        data-tooltip={`Switch to ${forecastMode === 'hourly' ? 'daily' : 'hourly'} forecast`}
+      >
+        {forecastMode === 'hourly' ? '7D' : '24H'}
+      </button>
       <div className="weather-header">
         <h2 className="location-name">{weather.location}</h2>
         <div className="weather-header-buttons">
-          <button 
-            type="button"
-            className="forecast-toggle"
-            onClick={onToggleForecastMode}
-            data-tooltip={`Switch to ${forecastMode === 'hourly' ? 'daily' : 'hourly'} forecast`}
-          >
-            {forecastMode === 'hourly' ? '7D' : '24H'}
-          </button>
-          <button 
-            type="button"
-            className="collapse-toggle"
-            onClick={onToggleCollapse}
-            data-tooltip={isCollapsed ? 'Show details' : 'Hide details'}
-          >
-            {isCollapsed ? '+' : '−'}
-          </button>
-          <button 
-            type="button"
-            className={`pin-button ${isPinned ? 'pinned' : ''}`}
-            onClick={isPinned ? onUnpin : onPin}
-            data-tooltip={isPinned ? 'Unpin location' : 'Pin location'}
-          >
-            {isPinned ? '●' : '○'}
-          </button>
         </div>
       </div>
       
@@ -392,6 +407,165 @@ function App() {
     setCurrentLocation(null);
   };
 
+  const handleDragStart = (result: any) => {
+    console.log('Drag started:', result);
+  };
+
+  const handleDragEnd = (result: DropResult) => {
+    console.log('Drag end:', result);
+    if (!result.destination) return;
+
+    const reversedItems = Array.from(pinnedLocations).reverse();
+
+    if (layoutMode === 'stacked') {
+      // Single column logic (current behavior)
+      const [reorderedItem] = reversedItems.splice(result.source.index, 1);
+      reversedItems.splice(result.destination.index, 0, reorderedItem);
+    } else {
+      // 2-column grid logic
+      const sourceColumnId = result.source.droppableId;
+      const destColumnId = result.destination.droppableId;
+      
+      // Convert grid positions back to single array
+      const sourceArrayIndex = gridPositionToArrayIndex(result.source.index, sourceColumnId, reversedItems.length);
+      const destArrayIndex = gridPositionToArrayIndex(result.destination.index, destColumnId, reversedItems.length);
+      
+      console.log('Grid drag:', {
+        sourceColumn: sourceColumnId,
+        destColumn: destColumnId,
+        sourceIndex: result.source.index,
+        destIndex: result.destination.index,
+        sourceArrayIndex,
+        destArrayIndex,
+        totalItems: reversedItems.length,
+        itemsBeforeMove: reversedItems.map(l => l.name)
+      });
+
+      const [reorderedItem] = reversedItems.splice(sourceArrayIndex, 1);
+      reversedItems.splice(destArrayIndex, 0, reorderedItem);
+    }
+    
+    // Reverse back to get the original order
+    const newItems = reversedItems.reverse();
+    
+    console.log('Original order:', pinnedLocations.map(l => l.name));
+    console.log('New order:', newItems.map(l => l.name));
+
+    setPinnedLocations(newItems);
+  };
+
+  // Helper function to convert grid position to array index
+  const gridPositionToArrayIndex = (positionInColumn: number, columnId: string, totalItems: number) => {
+    const column = columnId === 'column-0' ? 0 : 1;
+    return positionInColumn * 2 + column;
+  };
+
+  // Helper function to convert array index to grid position
+  const arrayIndexToGridPosition = (arrayIndex: number) => {
+    const column = arrayIndex % 2;
+    const positionInColumn = Math.floor(arrayIndex / 2);
+    return { column, positionInColumn };
+  };
+
+  // Get items for a specific column in 2-column layout
+  const getColumnItems = (columnIndex: number) => {
+    const reversedItems = pinnedLocations.slice().reverse();
+    const columnItems = [];
+    
+    for (let i = columnIndex; i < reversedItems.length; i += 2) {
+      columnItems.push({
+        location: reversedItems[i],
+        originalIndex: i
+      });
+    }
+    
+    return columnItems;
+  };
+
+  // Render a weather card (used by both layouts)
+  const renderWeatherCard = (location: Location, index: number, droppableId: string, originalIndex?: number) => {
+    // Validate location object
+    if (!location || !location.name || !location.country) {
+      return null;
+    }
+    
+    const locationKey = `${location.name}, ${location.country}`;
+    const weatherData = pinnedWeatherData[locationKey];
+    const actualIndex = originalIndex !== undefined ? originalIndex : index;
+    
+    if (!weatherData) {
+      return (
+        <Draggable key={locationKey} draggableId={locationKey} index={index}>
+          {(provided, snapshot) => (
+            <div 
+              ref={provided.innerRef}
+              {...provided.draggableProps}
+              className="weather-display"
+              style={{
+                ...provided.draggableProps.style,
+                opacity: snapshot.isDragging ? 0.8 : 1,
+              }}
+            >
+              <div 
+                {...provided.dragHandleProps}
+                className="drag-handle"
+                data-tooltip="Drag to reorder"
+              >
+                <div className="drag-dots">
+                  <span></span><span></span><span></span>
+                  <span></span><span></span><span></span>
+                  <span></span><span></span><span></span>
+                </div>
+              </div>
+              <div className="weather-header">
+                <h2 className="location-name">{locationKey}</h2>
+                <button 
+                  type="button"
+                  className="pin-button pinned"
+                  onClick={() => unpinLocation(locationKey)}
+                  data-tooltip="Unpin location"
+                >
+                  ●
+                </button>
+              </div>
+              <div className="loading">Loading weather data...</div>
+            </div>
+          )}
+        </Draggable>
+      );
+    }
+
+    return (
+      <Draggable key={locationKey} draggableId={locationKey} index={index}>
+        {(provided, snapshot) => (
+          <div 
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            style={{
+              ...provided.draggableProps.style,
+              opacity: snapshot.isDragging ? 0.8 : 1,
+              transform: provided.draggableProps.style?.transform,
+            }}
+          >
+            <WeatherCard
+              weather={weatherData}
+              isPinned={true}
+              onPin={() => {}}
+              onUnpin={() => unpinLocation(locationKey)}
+              onDragHandle={provided.dragHandleProps}
+              formatTemperature={formatTemperature}
+              temperatureUnit={temperatureUnit}
+              isCollapsed={collapsedCards[locationKey] ?? true}
+              onToggleCollapse={() => toggleCardCollapse(locationKey)}
+              forecastMode={forecastModes[locationKey] || 'hourly'}
+              onToggleForecastMode={() => toggleForecastMode(locationKey)}
+            />
+          </div>
+        )}
+      </Draggable>
+    );
+  };
+
   const refreshWeatherData = async (manual = false, refreshCurrent = true) => {
     if (manual) setRefreshing(true);
     
@@ -568,57 +742,64 @@ function App() {
             onClose={closeSearchedLocation}
             formatTemperature={formatTemperature}
             temperatureUnit={temperatureUnit}
-            isCollapsed={collapsedCards[weather.location] || false}
+            isCollapsed={collapsedCards[weather.location] ?? true}
             onToggleCollapse={() => toggleCardCollapse(weather.location)}
             forecastMode={forecastModes[weather.location] || 'hourly'}
             onToggleForecastMode={() => toggleForecastMode(weather.location)}
           />
         )}
 
-        {pinnedLocations.slice().reverse().map((location, index) => {
-          // Validate location object
-          if (!location || !location.name || !location.country) {
-            return null;
-          }
-          
-          const locationKey = `${location.name}, ${location.country}`;
-          const weatherData = pinnedWeatherData[locationKey];
-          
-          if (!weatherData) {
-            return (
-              <div key={`pinned-loading-${index}`} className="weather-display">
-                <div className="weather-header">
-                  <h2 className="location-name">{locationKey}</h2>
-                  <button 
-                    type="button"
-                    className="pin-button pinned"
-                    onClick={() => unpinLocation(locationKey)}
-                    data-tooltip="Unpin location"
-                  >
-                    ●
-                  </button>
+        <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          {layoutMode === 'stacked' ? (
+            // Single column layout
+            <Droppable droppableId="pinned-locations">
+              {(provided, snapshot) => (
+                <div 
+                  {...provided.droppableProps} 
+                  ref={provided.innerRef} 
+                  className={`weather-droppable-area ${layoutMode} ${Object.values(collapsedCards).some(collapsed => collapsed) ? 'has-collapsed-cards' : ''}`}
+                >
+                  {pinnedLocations.slice().reverse().map((location, index) => 
+                    renderWeatherCard(location, index, 'pinned-locations')
+                  ).filter(Boolean)}
+                  {provided.placeholder}
                 </div>
-                <div className="loading">Loading weather data...</div>
-              </div>
-            );
-          }
-
-          return (
-            <WeatherCard
-              key={`pinned-${index}`}
-              weather={weatherData}
-              isPinned={true}
-              onPin={() => {}}
-              onUnpin={() => unpinLocation(locationKey)}
-              formatTemperature={formatTemperature}
-              temperatureUnit={temperatureUnit}
-              isCollapsed={collapsedCards[locationKey] || false}
-              onToggleCollapse={() => toggleCardCollapse(locationKey)}
-              forecastMode={forecastModes[locationKey] || 'hourly'}
-              onToggleForecastMode={() => toggleForecastMode(locationKey)}
-            />
-          );
-        }).filter(Boolean)}
+              )}
+            </Droppable>
+          ) : (
+            // 2-column grid layout
+            <div className={`weather-droppable-area ${layoutMode} ${Object.values(collapsedCards).some(collapsed => collapsed) ? 'has-collapsed-cards' : ''}`}>
+              <Droppable droppableId="column-0">
+                {(provided, snapshot) => (
+                  <div 
+                    {...provided.droppableProps} 
+                    ref={provided.innerRef} 
+                    className="weather-column"
+                  >
+                    {getColumnItems(0).map((item, index) => 
+                      renderWeatherCard(item.location, index, 'column-0', item.originalIndex)
+                    ).filter(Boolean)}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+              <Droppable droppableId="column-1">
+                {(provided, snapshot) => (
+                  <div 
+                    {...provided.droppableProps} 
+                    ref={provided.innerRef} 
+                    className="weather-column"
+                  >
+                    {getColumnItems(1).map((item, index) => 
+                      renderWeatherCard(item.location, index, 'column-1', item.originalIndex)
+                    ).filter(Boolean)}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </div>
+          )}
+        </DragDropContext>
       </div>
     </div>
   );
