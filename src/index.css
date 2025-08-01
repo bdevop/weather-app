@@ -326,11 +326,15 @@ body {
   border-bottom: none;
 }
 
+.search-result-container {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
 .weather-container {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  margin-top: 2rem;
 }
 
 .weather-container.has-collapsed-cards {

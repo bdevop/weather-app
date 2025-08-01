@@ -13,6 +13,7 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
+  rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import {
   useSortable,
@@ -287,8 +288,8 @@ const SortableWeatherCard = (props: SortableWeatherCardProps) => {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <WeatherCard {...props} />
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <WeatherCard {...props} onDragHandle={listeners} />
     </div>
   );
 };
@@ -646,8 +647,8 @@ function App() {
       
       {error && <div className="error">{error}</div>}
 
-      <div className={`weather-container ${layoutMode} ${Object.values(collapsedCards).some(collapsed => collapsed) ? 'has-collapsed-cards' : ''}`}>
-        {weather && !loading && !isLocationPinned(weather.location) && (
+      {weather && !loading && !isLocationPinned(weather.location) && (
+        <div className="search-result-container">
           <WeatherCard
             weather={weather}
             isPinned={false}
@@ -661,8 +662,10 @@ function App() {
             forecastMode={forecastModes[weather.location] || 'hourly'}
             onToggleForecastMode={() => toggleForecastMode(weather.location)}
           />
-        )}
+        </div>
+      )}
 
+      <div className={`weather-container ${layoutMode} ${Object.values(collapsedCards).some(collapsed => collapsed) ? 'has-collapsed-cards' : ''}`}>
         <DndContext 
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -672,7 +675,7 @@ function App() {
             items={pinnedLocations.slice().reverse().map(location => 
               `${location.name}-${location.state || ''}-${location.country}`
             )}
-            strategy={verticalListSortingStrategy}
+            strategy={layoutMode === 'side-by-side' ? rectSortingStrategy : verticalListSortingStrategy}
           >
             <div className={`weather-droppable-area ${layoutMode} ${Object.values(collapsedCards).some(collapsed => collapsed) ? 'has-collapsed-cards' : ''}`}>
               {pinnedLocations.slice().reverse().map((location) => {
