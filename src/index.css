@@ -341,6 +341,7 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
   gap: 2rem;
+  align-items: start;
 }
 
 @media (max-width: 1200px) {
