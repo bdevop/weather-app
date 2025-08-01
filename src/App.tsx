@@ -666,16 +666,6 @@ function App() {
           )}
         </div>
         <div className="header-controls">
-          {pinnedLocations.length > 1 && (
-            <button 
-              type="button"
-              className="layout-toggle" 
-              onClick={toggleLayoutMode}
-              data-tooltip={layoutMode === 'stacked' ? 'Switch to side-by-side layout' : 'Switch to stacked layout'}
-            >
-              {layoutMode === 'stacked' ? '2' : '1'}
-            </button>
-          )}
           <button 
             type="button"
             className="refresh-button" 
@@ -693,13 +683,23 @@ function App() {
           >
             °{temperatureUnit}
           </button>
+          {pinnedLocations.length > 1 && (
+            <button 
+              type="button"
+              className="layout-toggle" 
+              onClick={toggleLayoutMode}
+              data-tooltip={layoutMode === 'stacked' ? 'Switch to side-by-side layout' : 'Switch to stacked layout'}
+            >
+              {layoutMode === 'stacked' ? 'Grid' : 'Stack'}
+            </button>
+          )}
           <button 
             type="button"
             className="theme-toggle" 
             onClick={toggleTheme}
             data-tooltip={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
           >
-            {theme === 'light' ? '●' : '○'}
+            {theme === 'light' ? 'Dark' : 'Light'}
           </button>
         </div>
       </div>
