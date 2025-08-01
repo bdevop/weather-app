@@ -453,6 +453,7 @@ body {
   margin-bottom: 3rem;
   padding: 1.5rem 0;
   border-bottom: 1px solid var(--border-color);
+  transition: margin-bottom 0.6s ease;
 }
 
 .weather-icon {
@@ -568,6 +569,15 @@ body {
 
 .forecast-section {
   margin-top: 2.5rem;
+  transition: margin-top 0.6s ease;
+}
+
+.collapsed-state .current-weather {
+  margin-bottom: 0.5rem;
+}
+
+.collapsed-state .forecast-section {
+  margin-top: 0.5rem;
 }
 
 .forecast-title {
