@@ -658,7 +658,10 @@ function App() {
     <div className="container">
       <div className="header">
         <div className="header-left">
-          <h1 className="app-title">Weather</h1>
+          <h1 className="app-title">
+            <span className="title-main">Weather</span>
+            <span className="title-accent">Peek</span>
+          </h1>
           {lastRefresh && (
             <div className="last-refresh">
               Updated {lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -683,16 +686,14 @@ function App() {
           >
             °{temperatureUnit}
           </button>
-          {pinnedLocations.length > 1 && (
-            <button 
-              type="button"
-              className="layout-toggle" 
-              onClick={toggleLayoutMode}
-              data-tooltip={layoutMode === 'stacked' ? 'Switch to side-by-side layout' : 'Switch to stacked layout'}
-            >
-              {layoutMode === 'stacked' ? 'Grid' : 'Stack'}
-            </button>
-          )}
+          <button 
+            type="button"
+            className="layout-toggle" 
+            onClick={toggleLayoutMode}
+            data-tooltip={layoutMode === 'stacked' ? 'Switch to side-by-side layout' : 'Switch to stacked layout'}
+          >
+            {layoutMode === 'stacked' ? 'Grid' : 'Stack'}
+          </button>
           <button 
             type="button"
             className="theme-toggle" 
