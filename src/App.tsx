@@ -78,6 +78,7 @@ interface WeatherCardProps {
   isPinned: boolean;
   onPin: () => void;
   onUnpin: () => void;
+  onClose?: () => void;
   formatTemperature: (tempC: number) => string;
   temperatureUnit: 'C' | 'F';
   isCollapsed: boolean;
@@ -86,7 +87,7 @@ interface WeatherCardProps {
   onToggleForecastMode: () => void;
 }
 
-const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature, temperatureUnit, isCollapsed, onToggleCollapse, forecastMode, onToggleForecastMode }: WeatherCardProps) => {
+const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, formatTemperature, temperatureUnit, isCollapsed, onToggleCollapse, forecastMode, onToggleForecastMode }: WeatherCardProps) => {
   const getWindSpeed = (speedKph: number) => {
     if (temperatureUnit === 'F') {
       return `${Math.round(speedKph * 0.621371)} mph`;
@@ -109,6 +110,15 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, formatTemperature, tem
   };
   return (
     <div className={`weather-display ${isCollapsed ? 'collapsed-state' : ''}`}>
+      {onClose && (
+        <button 
+          className="close-button-bubble"
+          onClick={onClose}
+          data-tooltip="Close"
+        >
+          ✕
+        </button>
+      )}
       <div className="weather-header">
         <h2 className="location-name">{weather.location}</h2>
         <div className="weather-header-buttons">
@@ -351,7 +361,7 @@ function App() {
     );
     
     if (!isAlreadyPinned) {
-      setPinnedLocations(prev => [...prev, currentLocation]);
+      setPinnedLocations(prev => [currentLocation, ...prev]);
     }
   };
 
@@ -371,6 +381,11 @@ function App() {
     return pinnedLocations.some(pinned => 
       `${pinned.name}, ${pinned.country}` === location
     );
+  };
+
+  const closeSearchedLocation = () => {
+    setWeather(null);
+    setCurrentLocation(null);
   };
 
   const refreshWeatherData = async (manual = false) => {
@@ -536,6 +551,22 @@ function App() {
       {error && <div className="error">{error}</div>}
 
       <div className={`weather-container ${layoutMode} ${Object.values(collapsedCards).some(collapsed => collapsed) ? 'has-collapsed-cards' : ''}`}>
+        {weather && !loading && !isLocationPinned(weather.location) && (
+          <WeatherCard
+            weather={weather}
+            isPinned={false}
+            onPin={pinLocation}
+            onUnpin={() => unpinLocation(weather.location)}
+            onClose={closeSearchedLocation}
+            formatTemperature={formatTemperature}
+            temperatureUnit={temperatureUnit}
+            isCollapsed={collapsedCards[weather.location] || false}
+            onToggleCollapse={() => toggleCardCollapse(weather.location)}
+            forecastMode={forecastModes[weather.location] || 'hourly'}
+            onToggleForecastMode={() => toggleForecastMode(weather.location)}
+          />
+        )}
+
         {pinnedLocations.map((location, index) => {
           // Validate location object
           if (!location || !location.name || !location.country) {
@@ -579,21 +610,6 @@ function App() {
             />
           );
         }).filter(Boolean)}
-
-        {weather && !loading && !isLocationPinned(weather.location) && (
-          <WeatherCard
-            weather={weather}
-            isPinned={false}
-            onPin={pinLocation}
-            onUnpin={() => unpinLocation(weather.location)}
-            formatTemperature={formatTemperature}
-            temperatureUnit={temperatureUnit}
-            isCollapsed={collapsedCards[weather.location] || false}
-            onToggleCollapse={() => toggleCardCollapse(weather.location)}
-            forecastMode={forecastModes[weather.location] || 'hourly'}
-            onToggleForecastMode={() => toggleForecastMode(weather.location)}
-          />
-        )}
       </div>
     </div>
   );
