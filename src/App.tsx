@@ -112,6 +112,7 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, formatTempera
     <div className={`weather-display ${isCollapsed ? 'collapsed-state' : ''}`}>
       {onClose && (
         <button 
+          type="button"
           className="close-button-bubble"
           onClick={onClose}
           data-tooltip="Close"
@@ -123,6 +124,7 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, formatTempera
         <h2 className="location-name">{weather.location}</h2>
         <div className="weather-header-buttons">
           <button 
+            type="button"
             className="forecast-toggle"
             onClick={onToggleForecastMode}
             data-tooltip={`Switch to ${forecastMode === 'hourly' ? 'daily' : 'hourly'} forecast`}
@@ -130,6 +132,7 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, formatTempera
             {forecastMode === 'hourly' ? '7D' : '24H'}
           </button>
           <button 
+            type="button"
             className="collapse-toggle"
             onClick={onToggleCollapse}
             data-tooltip={isCollapsed ? 'Show details' : 'Hide details'}
@@ -137,6 +140,7 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, formatTempera
             {isCollapsed ? '+' : '−'}
           </button>
           <button 
+            type="button"
             className={`pin-button ${isPinned ? 'pinned' : ''}`}
             onClick={isPinned ? onUnpin : onPin}
             data-tooltip={isPinned ? 'Unpin location' : 'Pin location'}
@@ -361,7 +365,7 @@ function App() {
     );
     
     if (!isAlreadyPinned) {
-      setPinnedLocations(prev => [currentLocation, ...prev]);
+      setPinnedLocations(prev => [...prev, currentLocation]);
     }
   };
 
@@ -388,12 +392,12 @@ function App() {
     setCurrentLocation(null);
   };
 
-  const refreshWeatherData = async (manual = false) => {
+  const refreshWeatherData = async (manual = false, refreshCurrent = true) => {
     if (manual) setRefreshing(true);
     
     try {
-      // Refresh current weather if available
-      if (currentLocation) {
+      // Refresh current weather if available and requested
+      if (currentLocation && refreshCurrent) {
         try {
           const weatherData = await getWeatherData(currentLocation);
           setWeather(weatherData);
@@ -446,7 +450,7 @@ function App() {
   useEffect(() => {
     console.log('Pinned locations changed:', pinnedLocations);
     if (pinnedLocations.length > 0) {
-      refreshWeatherData();
+      refreshWeatherData(false, false);
     }
   }, [pinnedLocations]);
 
@@ -490,6 +494,7 @@ function App() {
         <div className="header-controls">
           {pinnedLocations.length > 1 && (
             <button 
+              type="button"
               className="layout-toggle" 
               onClick={toggleLayoutMode}
               data-tooltip={layoutMode === 'stacked' ? 'Switch to side-by-side layout' : 'Switch to stacked layout'}
@@ -498,6 +503,7 @@ function App() {
             </button>
           )}
           <button 
+            type="button"
             className="refresh-button" 
             onClick={() => refreshWeatherData(true)}
             disabled={refreshing}
@@ -506,6 +512,7 @@ function App() {
             {refreshing ? '↻' : '↻'}
           </button>
           <button 
+            type="button"
             className="temp-unit-toggle" 
             onClick={toggleTemperatureUnit}
             data-tooltip={`Switch to °${temperatureUnit === 'F' ? 'C' : 'F'}`}
@@ -513,6 +520,7 @@ function App() {
             °{temperatureUnit}
           </button>
           <button 
+            type="button"
             className="theme-toggle" 
             onClick={toggleTheme}
             data-tooltip={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
@@ -567,7 +575,7 @@ function App() {
           />
         )}
 
-        {pinnedLocations.map((location, index) => {
+        {pinnedLocations.slice().reverse().map((location, index) => {
           // Validate location object
           if (!location || !location.name || !location.country) {
             return null;
@@ -582,6 +590,7 @@ function App() {
                 <div className="weather-header">
                   <h2 className="location-name">{locationKey}</h2>
                   <button 
+                    type="button"
                     className="pin-button pinned"
                     onClick={() => unpinLocation(locationKey)}
                     data-tooltip="Unpin location"
