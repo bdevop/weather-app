@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a modern React weather application built with TypeScript and Vite. The app allows users to search for locations, view current weather conditions and forecasts, and pin multiple locations for comparison. It features a clean, responsive UI with dark/light theme support and is containerized for deployment via Docker and Kubernetes.
+This is a modern React weather application built with TypeScript and Vite. The app allows users to search for locations, view current weather conditions and forecasts, and pin multiple locations for comparison. It features a clean, responsive UI with dark/light theme support and is containerized for deployment via Docker.
 
 ## Development Commands
 
 - `pnpm dev` - Start development server on port 3000
 - `pnpm build` - Build for production (TypeScript compilation + Vite build)
 - `pnpm preview` - Preview production build locally
-- `pnpm lint` - Run ESLint with TypeScript rules
+- `pnpm typecheck` - Run TypeScript type checking
 
 ## Architecture
 
@@ -58,7 +58,7 @@ All state is managed locally in `App.tsx` using React hooks:
 ### Development Dependencies
 - React 18 with TypeScript
 - Vite for build tooling and dev server
-- ESLint with TypeScript and React rules
+- TypeScript for type checking and compilation
 
 ## Deployment Architecture
 
@@ -67,10 +67,10 @@ All state is managed locally in `App.tsx` using React hooks:
 - Nginx server for production serving
 - Exposed on port 80 internally, configurable externally
 
-### Kubernetes
-- Complete k8s manifests in `/k8s/` directory
-- Deployment, Service, and Ingress configurations
-- Secure deployment scripts in `/scripts/` directory
+### CI/CD Integration
+- This repository focuses on application code and Docker image building
+- Kubernetes deployment is handled by a separate GitOps repository with Flux
+- CI pipeline should build and push images to Azure Container Registry
 
 ## File Structure Patterns
 

@@ -428,7 +428,10 @@ function App() {
       
       // Convert grid positions back to single array
       const sourceArrayIndex = gridPositionToArrayIndex(result.source.index, sourceColumnId, reversedItems.length);
-      const destArrayIndex = gridPositionToArrayIndex(result.destination.index, destColumnId, reversedItems.length);
+      let destArrayIndex = gridPositionToArrayIndex(result.destination.index, destColumnId, reversedItems.length);
+      
+      // Clamp destination index to valid range
+      destArrayIndex = Math.min(destArrayIndex, reversedItems.length - 1);
       
       console.log('Grid drag:', {
         sourceColumn: sourceColumnId,
@@ -442,7 +445,10 @@ function App() {
       });
 
       const [reorderedItem] = reversedItems.splice(sourceArrayIndex, 1);
-      reversedItems.splice(destArrayIndex, 0, reorderedItem);
+      
+      // After removing source item, adjust destination index if needed
+      const adjustedDestIndex = destArrayIndex > sourceArrayIndex ? destArrayIndex - 1 : destArrayIndex;
+      reversedItems.splice(adjustedDestIndex, 0, reorderedItem);
     }
     
     // Reverse back to get the original order
@@ -455,17 +461,16 @@ function App() {
   };
 
   // Helper function to convert grid position to array index
-  const gridPositionToArrayIndex = (positionInColumn: number, columnId: string, totalItems: number) => {
+  const gridPositionToArrayIndex = (positionInColumn: number, columnId: string, _totalItems: number) => {
     const column = columnId === 'column-0' ? 0 : 1;
+    
+    // In grid layout, items are distributed with even indices in column 0, odd in column 1
+    // So we need to map back correctly:
+    // Column 0: positions 0,1,2... map to array indices 0,2,4...
+    // Column 1: positions 0,1,2... map to array indices 1,3,5...
     return positionInColumn * 2 + column;
   };
 
-  // Helper function to convert array index to grid position
-  const arrayIndexToGridPosition = (arrayIndex: number) => {
-    const column = arrayIndex % 2;
-    const positionInColumn = Math.floor(arrayIndex / 2);
-    return { column, positionInColumn };
-  };
 
   // Get items for a specific column in 2-column layout
   const getColumnItems = (columnIndex: number) => {
@@ -483,7 +488,7 @@ function App() {
   };
 
   // Render a weather card (used by both layouts)
-  const renderWeatherCard = (location: Location, index: number, droppableId: string, originalIndex?: number) => {
+  const renderWeatherCard = (location: Location, index: number, _droppableId: string, _originalIndex?: number) => {
     // Validate location object
     if (!location || !location.name || !location.country) {
       return null;
@@ -491,7 +496,6 @@ function App() {
     
     const locationKey = `${location.name}, ${location.country}`;
     const weatherData = pinnedWeatherData[locationKey];
-    const actualIndex = originalIndex !== undefined ? originalIndex : index;
     
     if (!weatherData) {
       return (
@@ -754,7 +758,7 @@ function App() {
           {layoutMode === 'stacked' ? (
             // Single column layout
             <Droppable droppableId="pinned-locations">
-              {(provided, snapshot) => (
+              {(provided, _snapshot) => (
                 <div 
                   {...provided.droppableProps} 
                   ref={provided.innerRef} 
@@ -771,7 +775,7 @@ function App() {
             // 2-column grid layout
             <div className={`weather-droppable-area ${layoutMode} ${Object.values(collapsedCards).some(collapsed => collapsed) ? 'has-collapsed-cards' : ''}`}>
               <Droppable droppableId="column-0">
-                {(provided, snapshot) => (
+                {(provided, _snapshot) => (
                   <div 
                     {...provided.droppableProps} 
                     ref={provided.innerRef} 
@@ -785,7 +789,7 @@ function App() {
                 )}
               </Droppable>
               <Droppable droppableId="column-1">
-                {(provided, snapshot) => (
+                {(provided, _snapshot) => (
                   <div 
                     {...provided.droppableProps} 
                     ref={provided.innerRef} 
