@@ -17,7 +17,15 @@ export const searchLocations = async (query: string): Promise<Location[]> => {
     
     const data = await response.json();
     
-    return data.map((item: any) => ({
+    interface WeatherAPILocation {
+      name: string;
+      country: string;
+      region: string;
+      lat: number;
+      lon: number;
+    }
+
+    return data.map((item: WeatherAPILocation) => ({
       name: item.name,
       country: item.country,
       state: item.region,
@@ -49,12 +57,50 @@ export const getWeatherData = async (location: Location): Promise<WeatherData> =
     const forecastDays = data.forecast.forecastday;
     const astro = forecastDays[0].astro;
     
+    interface HourlyData {
+      time: string;
+      temp_c: number;
+      condition: {
+        text: string;
+        icon: string;
+      };
+    }
+
+    interface DayData {
+      date: string;
+      day: {
+        maxtemp_c: number;
+        mintemp_c: number;
+        avghumidity: number;
+        daily_chance_of_rain?: number;
+        maxwind_kph: number;
+        condition: {
+          text: string;
+          icon: string;
+        };
+      };
+      hour: HourlyData[];
+      astro: {
+        sunrise: string;
+        sunset: string;
+        moonrise: string;
+        moonset: string;
+        moon_phase: string;
+      };
+    }
+
     // Get hourly data for next 24 hours
-    const hourly: any[] = [];
+    const hourly: Array<{
+      time: string;
+      datetime: string;
+      temp: number;
+      description: string;
+      icon: string;
+    }> = [];
     const locationNow = new Date(locationData.localtime);
     
-    forecastDays.forEach((day: any) => {
-      day.hour.forEach((hour: any) => {
+    forecastDays.forEach((day: DayData) => {
+      day.hour.forEach((hour: HourlyData) => {
         const hourTime = new Date(hour.time);
         if (hourTime >= locationNow && hourly.length < 24) {
           hourly.push({
@@ -72,7 +118,7 @@ export const getWeatherData = async (location: Location): Promise<WeatherData> =
     });
 
     // Get daily forecast data
-    const daily = forecastDays.map((day: any) => ({
+    const daily = forecastDays.map((day: DayData) => ({
       date: new Date(day.date).toLocaleDateString('en-US', { 
         weekday: 'short',
         month: 'short',

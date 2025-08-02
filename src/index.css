@@ -1335,3 +1335,201 @@ body {
   border-radius: 4px;
   margin: 1rem 0;
 }
+
+/* Skeleton Loading States */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-loading {
+  pointer-events: none;
+}
+
+.skeleton-line {
+  background: linear-gradient(
+    90deg,
+    var(--border-color) 25%,
+    var(--border-light) 50%,
+    var(--border-color) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+  height: 1em;
+  margin: 0.25em 0;
+}
+
+.skeleton-title {
+  width: 150px;
+  height: 1.5em;
+}
+
+.skeleton-subtitle {
+  width: 100px;
+  height: 0.875em;
+  opacity: 0.7;
+}
+
+.skeleton-short {
+  width: 60%;
+}
+
+.skeleton-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(
+    90deg,
+    var(--border-color) 25%,
+    var(--border-light) 50%,
+    var(--border-color) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+}
+
+.skeleton-icon-small {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(
+    90deg,
+    var(--border-color) 25%,
+    var(--border-light) 50%,
+    var(--border-color) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+}
+
+.skeleton-temp {
+  width: 80px;
+  height: 2.5em;
+  background: linear-gradient(
+    90deg,
+    var(--border-color) 25%,
+    var(--border-light) 50%,
+    var(--border-color) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-temp-small {
+  width: 40px;
+  height: 1.2em;
+}
+
+.skeleton-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(
+    90deg,
+    var(--border-color) 25%,
+    var(--border-light) 50%,
+    var(--border-color) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+}
+
+.skeleton-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.skeleton-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.skeleton-current {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.skeleton-info {
+  flex: 1;
+}
+
+.skeleton-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.skeleton-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.skeleton-label {
+  width: 60px;
+  height: 0.875em;
+  opacity: 0.6;
+}
+
+.skeleton-value {
+  width: 80px;
+  height: 1em;
+}
+
+.skeleton-forecast-title {
+  width: 120px;
+  height: 1.2em;
+  margin-bottom: 1rem;
+}
+
+.skeleton-forecast-list {
+  display: flex;
+  gap: 1rem;
+  overflow-x: hidden;
+}
+
+.skeleton-forecast-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 80px;
+}
+
+.skeleton-time {
+  width: 40px;
+  height: 0.875em;
+}
+
+.search-results-skeleton {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.skeleton-search-item {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.skeleton-search-item:last-child {
+  border-bottom: none;
+}
+
+.skeleton-search-text {
+  width: 200px;
+  height: 1em;
+}
