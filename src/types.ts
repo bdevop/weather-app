@@ -24,12 +24,21 @@ export interface WeatherData {
     precipitation: number;
     dewPoint: number;
   };
+  astronomy: {
+    sunrise: string;
+    sunset: string;
+    moonrise: string;
+    moonset: string;
+    moonPhase: string;
+    localTime: string;
+  };
   hourly: HourlyWeather[];
   daily: DailyWeather[];
 }
 
 export interface HourlyWeather {
   time: string;
+  datetime: string;
   temp: number;
   description: string;
   icon: string;

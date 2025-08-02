@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -21,6 +21,132 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { Location, WeatherData } from './types';
 import { searchLocations, getWeatherData } from './services/weatherApi';
+
+const getWeatherCondition = (conditionText: string) => {
+  const condition = conditionText.toLowerCase();
+  
+  if (condition.includes('clear') || condition.includes('sunny')) {
+    return 'sunny';
+  }
+  if (condition.includes('thunder') || condition.includes('storm') || condition.includes('lightning')) {
+    return 'stormy';
+  }
+  if (condition.includes('rain') || condition.includes('shower') || condition.includes('drizzle')) {
+    return 'rainy';
+  }
+  if (condition.includes('snow') || condition.includes('blizzard') || condition.includes('sleet') || condition.includes('ice')) {
+    return 'snowy';
+  }
+  if (condition.includes('mist') || condition.includes('fog') || condition.includes('haze')) {
+    return 'foggy';
+  }
+  if (condition.includes('cloudy') || condition.includes('overcast')) {
+    return 'cloudy';
+  }
+  
+  return 'cloudy'; // default
+};
+
+const getTemperatureClass = (tempC: number) => {
+  if (tempC >= 30) return 'temp-hot';
+  if (tempC >= 20) return 'temp-warm';
+  if (tempC >= 10) return 'temp-mild';
+  if (tempC >= 0) return 'temp-cool';
+  return 'temp-cold';
+};
+
+const getTimeOfDay = (localTime: string, sunrise: string, sunset: string) => {
+  const parseTime = (timeStr: string) => {
+    const [time, period] = timeStr.split(' ');
+    const [hours, minutes] = time.split(':').map(Number);
+    let hour24 = hours;
+    
+    if (period === 'PM' && hours !== 12) {
+      hour24 += 12;
+    } else if (period === 'AM' && hours === 12) {
+      hour24 = 0;
+    }
+    
+    return hour24 * 60 + minutes; // Convert to minutes since midnight
+  };
+
+  // Parse current time from localTime (format: "2024-01-01 14:30")
+  const currentTime = new Date(localTime);
+  const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+  
+  const sunriseMinutes = parseTime(sunrise);
+  const sunsetMinutes = parseTime(sunset);
+  
+  // Define time periods (in minutes before/after sunrise/sunset)
+  const dawnStart = sunriseMinutes - 30; // 30 min before sunrise
+  const dawnEnd = sunriseMinutes + 15;   // 15 min after sunrise
+  const duskStart = sunsetMinutes - 30;  // 30 min before sunset
+  const duskEnd = sunsetMinutes + 15;    // 15 min after sunset
+  
+  if (currentMinutes >= dawnStart && currentMinutes <= dawnEnd) {
+    return 'time-dawn';
+  } else if (currentMinutes > dawnEnd && currentMinutes < duskStart) {
+    return 'time-day';
+  } else if (currentMinutes >= duskStart && currentMinutes <= duskEnd) {
+    return 'time-dusk';
+  } else {
+    return 'time-night';
+  }
+};
+
+const getCurrentLocationTime = (staticLocalTime: string) => {
+  // Parse the static local time from weather data
+  const staticTime = new Date(staticLocalTime);
+  const staticTimeMs = staticTime.getTime();
+  
+  // Calculate timezone offset from the static time
+  const now = new Date();
+  const timeDifference = staticTimeMs - now.getTime();
+  
+  // Apply the timezone offset to current time
+  const currentLocationTime = new Date(now.getTime() + timeDifference);
+  
+  return currentLocationTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+const getForecastTimeOfDay = (hourDatetime: string, sunrise: string, sunset: string) => {
+  // Parse the hour datetime (format: "2024-01-01 14:00")
+  const hourTime = new Date(hourDatetime);
+  const hourMinutes = hourTime.getHours() * 60 + hourTime.getMinutes();
+  
+  const parseTime = (timeStr: string) => {
+    const [time, period] = timeStr.split(' ');
+    const [hours, minutes] = time.split(':').map(Number);
+    let hour24 = hours;
+    
+    if (period === 'PM' && hours !== 12) {
+      hour24 += 12;
+    } else if (period === 'AM' && hours === 12) {
+      hour24 = 0;
+    }
+    
+    return hour24 * 60 + minutes;
+  };
+  
+  const sunriseMinutes = parseTime(sunrise);
+  const sunsetMinutes = parseTime(sunset);
+  
+  // Define time periods (same as main function)
+  const dawnStart = sunriseMinutes - 30;
+  const dawnEnd = sunriseMinutes + 15;
+  const duskStart = sunsetMinutes - 30;
+  const duskEnd = sunsetMinutes + 15;
+  
+  if (hourMinutes >= dawnStart && hourMinutes <= dawnEnd) {
+    return 'time-dawn';
+  } else if (hourMinutes > dawnEnd && hourMinutes < duskStart) {
+    return 'time-day';
+  } else if (hourMinutes >= duskStart && hourMinutes <= duskEnd) {
+    return 'time-dusk';
+  } else {
+    return 'time-night';
+  }
+};
 
 const getWeatherIcon = (conditionText: string, iconUrl: string) => {
   // WeatherAPI.com provides detailed condition text, let's use that for better accuracy
@@ -129,8 +255,12 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, onDragHandle,
     }
     return `${precipMm} mm`;
   };
+  const weatherCondition = getWeatherCondition(weather.current.description);
+  const temperatureClass = getTemperatureClass(weather.current.temp);
+  const timeOfDay = getTimeOfDay(weather.astronomy.localTime, weather.astronomy.sunrise, weather.astronomy.sunset);
+  
   return (
-    <div className={`weather-display ${isCollapsed ? 'collapsed-state' : ''}`}>
+    <div className={`weather-display ${isCollapsed ? 'collapsed-state' : ''} ${weatherCondition} ${timeOfDay}`}>
       {onClose && (
         <button 
           type="button"
@@ -179,14 +309,19 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, onDragHandle,
         {forecastMode === 'hourly' ? '7D' : '24H'}
       </button>
       <div className="weather-header">
-        <h2 className="location-name">{weather.location}</h2>
+        <div className="location-info">
+          <h2 className="location-name">{weather.location}</h2>
+          <div className="location-time">
+            Current time: {new Date(weather.astronomy.localTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </div>
+        </div>
         <div className="weather-header-buttons">
         </div>
       </div>
       
       <div className="current-weather">
         <div className="weather-icon">{getWeatherIcon(weather.current.description, weather.current.icon)}</div>
-        <div className="temperature">{formatTemperature(weather.current.temp)}</div>
+        <div className={`temperature ${temperatureClass}`}>{formatTemperature(weather.current.temp)}</div>
         <div className="weather-info">
           <div className="weather-description">{weather.current.description}</div>
           <div className="feels-like">Feels like {formatTemperature(weather.current.feels_like)}</div>
@@ -195,34 +330,44 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, onDragHandle,
 
       <div className={`weather-metrics ${isCollapsed ? 'collapsed' : 'expanded'}`}>
         <div className="metrics-list">
-          <div className="metric-item">
+          <div className="metric-item humidity">
             <span className="metric-label">Humidity</span>
             <span className="metric-value">{weather.current.humidity}%</span>
           </div>
           
-          <div className="metric-item">
+          <div className="metric-item wind">
             <span className="metric-label">Wind</span>
             <span className="metric-value">{getWindSpeed(weather.current.windSpeed)} {weather.current.windDirection}</span>
           </div>
           
-          <div className="metric-item">
+          <div className="metric-item visibility">
             <span className="metric-label">Visibility</span>
             <span className="metric-value">{getVisibility(weather.current.visibility)}</span>
           </div>
           
-          <div className="metric-item">
+          <div className="metric-item uv">
             <span className="metric-label">UV Index</span>
             <span className="metric-value">{weather.current.uvIndex}</span>
           </div>
           
-          <div className="metric-item">
+          <div className="metric-item pressure">
             <span className="metric-label">Cloud Cover</span>
             <span className="metric-value">{weather.current.cloudCover}%</span>
           </div>
           
-          <div className="metric-item">
+          <div className="metric-item feels-like">
             <span className="metric-label">Precipitation</span>
             <span className="metric-value">{getPrecipitation(weather.current.precipitation)}</span>
+          </div>
+          
+          <div className="metric-item">
+            <span className="metric-label">🌅 Sunrise</span>
+            <span className="metric-value">{weather.astronomy.sunrise}</span>
+          </div>
+          
+          <div className="metric-item">
+            <span className="metric-label">🌇 Sunset</span>
+            <span className="metric-value">{weather.astronomy.sunset}</span>
           </div>
         </div>
       </div>
@@ -232,14 +377,27 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, onDragHandle,
           <>
             <h3 className="forecast-title">24-Hour Forecast</h3>
             <div className="forecast-list">
-              {weather.hourly.map((hour, index) => (
-                <div key={index} className="forecast-item">
-                  <div className="forecast-time">{hour.time}</div>
-                  <div className="forecast-icon">{getWeatherIcon(hour.description, hour.icon)}</div>
-                  <div className="forecast-temp">{formatTemperature(hour.temp)}</div>
-                  <div className="forecast-desc">{hour.description}</div>
-                </div>
-              ))}
+              {weather.hourly.map((hour, index) => {
+                const hourTimeOfDay = getForecastTimeOfDay(hour.datetime, weather.astronomy.sunrise, weather.astronomy.sunset);
+                // Debug logging for first few items
+                if (index < 3) {
+                  console.log(`Hour ${index}:`, {
+                    displayTime: hour.time,
+                    datetime: hour.datetime,
+                    timeOfDay: hourTimeOfDay,
+                    sunrise: weather.astronomy.sunrise,
+                    sunset: weather.astronomy.sunset
+                  });
+                }
+                return (
+                  <div key={index} className={`forecast-item ${getWeatherCondition(hour.description)} ${hourTimeOfDay}`}>
+                    <div className="forecast-time">{hour.time}</div>
+                    <div className="forecast-icon">{getWeatherIcon(hour.description, hour.icon)}</div>
+                    <div className={`forecast-temp ${getTemperatureClass(hour.temp)}`}>{formatTemperature(hour.temp)}</div>
+                    <div className="forecast-desc">{hour.description}</div>
+                  </div>
+                );
+              })}
             </div>
           </>
         ) : (
@@ -247,12 +405,12 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, onDragHandle,
             <h3 className="forecast-title">7-Day Forecast</h3>
             <div className="forecast-list">
               {weather.daily.map((day, index) => (
-                <div key={index} className="forecast-item daily-item">
+                <div key={index} className={`forecast-item daily-item ${getWeatherCondition(day.description)}`}>
                   <div className="forecast-time">{day.date}</div>
                   <div className="forecast-icon">{getWeatherIcon(day.description, day.icon)}</div>
                   <div className="forecast-temp-range">
-                    <span className="temp-high">{formatTemperature(day.tempHigh)}</span>
-                    <span className="temp-low">{formatTemperature(day.tempLow)}</span>
+                    <span className={`temp-high ${getTemperatureClass(day.tempHigh)}`}>{formatTemperature(day.tempHigh)}</span>
+                    <span className={`temp-low ${getTemperatureClass(day.tempLow)}`}>{formatTemperature(day.tempLow)}</span>
                   </div>
                   <div className="forecast-desc">{day.description}</div>
                   <div className="daily-details">
@@ -295,6 +453,7 @@ const SortableWeatherCard = (props: SortableWeatherCardProps) => {
 };
 
 function App() {
+  const isInitialLoad = useRef(true);
   const [query, setQuery] = useState('');
   const [locations, setLocations] = useState<Location[]>([]);
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -416,7 +575,7 @@ function App() {
     return `${convertTemperature(tempC, temperatureUnit)}°${temperatureUnit}`;
   };
 
-  const pinLocation = () => {
+  const pinLocation = async () => {
     if (!currentLocation) return;
     
     const isAlreadyPinned = pinnedLocations.some(pinned => 
@@ -424,7 +583,15 @@ function App() {
     );
     
     if (!isAlreadyPinned) {
-      setPinnedLocations(prev => [...prev, currentLocation]);
+      const newPinnedLocations = [...pinnedLocations, currentLocation];
+      setPinnedLocations(newPinnedLocations);
+      
+      console.log('Pinning location, will refresh all pinned locations to sync timestamps');
+      // Refresh all pinned locations (including the new one) to sync timestamps
+      setTimeout(() => {
+        console.log('Refreshing all pinned locations after pin');
+        refreshWeatherData(false, false);
+      }, 500);
     }
   };
 
@@ -481,6 +648,7 @@ function App() {
 
 
   const refreshWeatherData = async (manual = false, refreshCurrent = true) => {
+    console.log('refreshWeatherData called:', { manual, refreshCurrent, pinnedCount: pinnedLocations.length });
     if (manual) setRefreshing(true);
     
     try {
@@ -534,11 +702,12 @@ function App() {
     return () => clearTimeout(delayedSearch);
   }, [query]);
 
-  // Load weather data for pinned locations on mount and when pinned locations change
+  // Load weather data for pinned locations - only on initial load, not when adding new pins
   useEffect(() => {
-    console.log('Pinned locations changed:', pinnedLocations);
-    if (pinnedLocations.length > 0) {
+    if (isInitialLoad.current && pinnedLocations.length > 0) {
+      console.log('Initial load of pinned locations:', pinnedLocations);
       refreshWeatherData(false, false);
+      isInitialLoad.current = false;
     }
   }, [pinnedLocations]);
 

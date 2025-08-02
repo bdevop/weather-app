@@ -44,21 +44,24 @@ export const getWeatherData = async (location: Location): Promise<WeatherData> =
     
     
     const current = data.current;
+    const locationData = data.location;
     const forecastDays = data.forecast.forecastday;
+    const astro = forecastDays[0].astro;
     
     // Get hourly data for next 24 hours
     const hourly: any[] = [];
-    const now = new Date();
+    const locationNow = new Date(locationData.localtime);
     
     forecastDays.forEach((day: any) => {
       day.hour.forEach((hour: any) => {
         const hourTime = new Date(hour.time);
-        if (hourTime >= now && hourly.length < 24) {
+        if (hourTime >= locationNow && hourly.length < 24) {
           hourly.push({
             time: hourTime.toLocaleTimeString('en-US', { 
               hour: 'numeric',
               hour12: true 
             }),
+            datetime: hour.time, // Full datetime string for time-of-day calculation
             temp: Math.round(hour.temp_c),
             description: hour.condition.text,
             icon: hour.condition.icon,
@@ -100,6 +103,14 @@ export const getWeatherData = async (location: Location): Promise<WeatherData> =
         cloudCover: current.cloud,
         precipitation: current.precip_mm || 0,
         dewPoint: Math.round(current.dewpoint_c),
+      },
+      astronomy: {
+        sunrise: astro.sunrise,
+        sunset: astro.sunset,
+        moonrise: astro.moonrise,
+        moonset: astro.moonset,
+        moonPhase: astro.moon_phase,
+        localTime: locationData.localtime,
       },
       hourly,
       daily,
