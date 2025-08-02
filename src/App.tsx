@@ -94,20 +94,6 @@ const getTimeOfDay = (localTime: string, sunrise: string, sunset: string) => {
   }
 };
 
-const getCurrentLocationTime = (staticLocalTime: string) => {
-  // Parse the static local time from weather data
-  const staticTime = new Date(staticLocalTime);
-  const staticTimeMs = staticTime.getTime();
-  
-  // Calculate timezone offset from the static time
-  const now = new Date();
-  const timeDifference = staticTimeMs - now.getTime();
-  
-  // Apply the timezone offset to current time
-  const currentLocationTime = new Date(now.getTime() + timeDifference);
-  
-  return currentLocationTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-};
 
 const getForecastTimeOfDay = (hourDatetime: string, sunrise: string, sunset: string) => {
   // Parse the hour datetime (format: "2024-01-01 14:00")
@@ -242,11 +228,14 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, onDragHandle,
     return `${speedKph} km/h`;
   };
 
-  const getVisibility = (visKm: number) => {
-    if (temperatureUnit === 'F') {
-      return `${Math.round(visKm * 0.621371)} mi`;
-    }
-    return `${visKm} km`;
+  const getAirQuality = (aqi: number) => {
+    if (aqi === 1) return 'Good';
+    if (aqi === 2) return 'Moderate';
+    if (aqi === 3) return 'Unhealthy for Sensitive Groups';
+    if (aqi === 4) return 'Unhealthy';
+    if (aqi === 5) return 'Very Unhealthy';
+    if (aqi === 6) return 'Hazardous';
+    return 'Unknown';
   };
 
   const getPrecipitation = (precipMm: number) => {
@@ -312,7 +301,7 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, onDragHandle,
         <div className="location-info">
           <h2 className="location-name">{weather.location}</h2>
           <div className="location-time">
-            Current time: {new Date(weather.astronomy.localTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            Local time: {new Date(weather.astronomy.localTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
         </div>
         <div className="weather-header-buttons">
@@ -330,9 +319,19 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, onDragHandle,
 
       <div className={`weather-metrics ${isCollapsed ? 'collapsed' : 'expanded'}`}>
         <div className="metrics-list">
-          <div className="metric-item humidity">
-            <span className="metric-label">Humidity</span>
-            <span className="metric-value">{weather.current.humidity}%</span>
+          <div className="metric-item">
+            <span className="metric-label">Sunrise</span>
+            <span className="metric-value">{weather.astronomy.sunrise}</span>
+          </div>
+          
+          <div className="metric-item">
+            <span className="metric-label">Sunset</span>
+            <span className="metric-value">{weather.astronomy.sunset}</span>
+          </div>
+          
+          <div className="metric-item air-quality">
+            <span className="metric-label">Air Quality</span>
+            <span className="metric-value">{getAirQuality(weather.current.airQuality)}</span>
           </div>
           
           <div className="metric-item wind">
@@ -340,14 +339,9 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, onDragHandle,
             <span className="metric-value">{getWindSpeed(weather.current.windSpeed)} {weather.current.windDirection}</span>
           </div>
           
-          <div className="metric-item visibility">
-            <span className="metric-label">Visibility</span>
-            <span className="metric-value">{getVisibility(weather.current.visibility)}</span>
-          </div>
-          
-          <div className="metric-item uv">
-            <span className="metric-label">UV Index</span>
-            <span className="metric-value">{weather.current.uvIndex}</span>
+          <div className="metric-item humidity">
+            <span className="metric-label">Humidity</span>
+            <span className="metric-value">{weather.current.humidity}%</span>
           </div>
           
           <div className="metric-item pressure">
@@ -360,14 +354,9 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, onDragHandle,
             <span className="metric-value">{getPrecipitation(weather.current.precipitation)}</span>
           </div>
           
-          <div className="metric-item">
-            <span className="metric-label">🌅 Sunrise</span>
-            <span className="metric-value">{weather.astronomy.sunrise}</span>
-          </div>
-          
-          <div className="metric-item">
-            <span className="metric-label">🌇 Sunset</span>
-            <span className="metric-value">{weather.astronomy.sunset}</span>
+          <div className="metric-item uv">
+            <span className="metric-label">UV Index</span>
+            <span className="metric-value">{weather.current.uvIndex}</span>
           </div>
         </div>
       </div>
@@ -379,16 +368,6 @@ const WeatherCard = ({ weather, isPinned, onPin, onUnpin, onClose, onDragHandle,
             <div className="forecast-list">
               {weather.hourly.map((hour, index) => {
                 const hourTimeOfDay = getForecastTimeOfDay(hour.datetime, weather.astronomy.sunrise, weather.astronomy.sunset);
-                // Debug logging for first few items
-                if (index < 3) {
-                  console.log(`Hour ${index}:`, {
-                    displayTime: hour.time,
-                    datetime: hour.datetime,
-                    timeOfDay: hourTimeOfDay,
-                    sunrise: weather.astronomy.sunrise,
-                    sunset: weather.astronomy.sunset
-                  });
-                }
                 return (
                   <div key={index} className={`forecast-item ${getWeatherCondition(hour.description)} ${hourTimeOfDay}`}>
                     <div className="forecast-time">{hour.time}</div>
@@ -462,6 +441,8 @@ function App() {
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [currentlyPinning, setCurrentlyPinning] = useState<string | null>(null);
+  const [needsSyncAfterPin, setNeedsSyncAfterPin] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const savedTheme = localStorage.getItem('weather-app-theme');
     return (savedTheme as 'light' | 'dark') || 'dark';
@@ -475,7 +456,6 @@ function App() {
       
       // Check if this is old weather data format (has 'current' property)
       if (parsed.length > 0 && parsed[0].current) {
-        console.log('Migrating old pinned weather data to new format...');
         // Clear old format and start fresh
         localStorage.removeItem('weather-app-pinned');
         return [];
@@ -553,7 +533,7 @@ function App() {
   const toggleCardCollapse = (location: string) => {
     setCollapsedCards(prev => ({
       ...prev,
-      [location]: !prev[location]
+      [location]: !(prev[location] ?? true)
     }));
   };
 
@@ -576,22 +556,27 @@ function App() {
   };
 
   const pinLocation = async () => {
-    if (!currentLocation) return;
+    if (!currentLocation || !weather) return;
     
     const isAlreadyPinned = pinnedLocations.some(pinned => 
       pinned.name === currentLocation.name && pinned.country === currentLocation.country
     );
     
     if (!isAlreadyPinned) {
-      const newPinnedLocations = [...pinnedLocations, currentLocation];
-      setPinnedLocations(newPinnedLocations);
+      const locationKey = `${currentLocation.name}, ${currentLocation.country}`;
       
-      console.log('Pinning location, will refresh all pinned locations to sync timestamps');
-      // Refresh all pinned locations (including the new one) to sync timestamps
-      setTimeout(() => {
-        console.log('Refreshing all pinned locations after pin');
-        refreshWeatherData(false, false);
-      }, 500);
+      // Mark as currently being pinned to hide search result immediately
+      setCurrentlyPinning(locationKey);
+      
+      // Add location to pinned list and weather data simultaneously
+      setPinnedLocations([...pinnedLocations, currentLocation]);
+      setPinnedWeatherData(prev => ({
+        ...prev,
+        [locationKey]: weather
+      }));
+      
+      // Flag that we need to sync after this pin operation
+      setNeedsSyncAfterPin(true);
     }
   };
 
@@ -608,9 +593,11 @@ function App() {
   };
 
   const isLocationPinned = (location: string) => {
-    return pinnedLocations.some(pinned => 
+    const isPinned = pinnedLocations.some(pinned => 
       `${pinned.name}, ${pinned.country}` === location
     );
+    const isCurrentlyBeingPinned = currentlyPinning === location;
+    return isPinned || isCurrentlyBeingPinned;
   };
 
   const closeSearchedLocation = () => {
@@ -648,8 +635,9 @@ function App() {
 
 
   const refreshWeatherData = async (manual = false, refreshCurrent = true) => {
-    console.log('refreshWeatherData called:', { manual, refreshCurrent, pinnedCount: pinnedLocations.length });
-    if (manual) setRefreshing(true);
+    if (manual) {
+      setRefreshing(true);
+    }
     
     try {
       // Refresh current weather if available and requested
@@ -705,11 +693,20 @@ function App() {
   // Load weather data for pinned locations - only on initial load, not when adding new pins
   useEffect(() => {
     if (isInitialLoad.current && pinnedLocations.length > 0) {
-      console.log('Initial load of pinned locations:', pinnedLocations);
       refreshWeatherData(false, false);
       isInitialLoad.current = false;
     }
   }, [pinnedLocations]);
+
+  // Sync weather data after pinning a new location
+  useEffect(() => {
+    if (needsSyncAfterPin && !isInitialLoad.current) {
+      refreshWeatherData(false, false).finally(() => {
+        setCurrentlyPinning(null);
+        setNeedsSyncAfterPin(false);
+      });
+    }
+  }, [needsSyncAfterPin, pinnedLocations]);
 
   // Auto-refresh weather data every 10 minutes
   useEffect(() => {
@@ -718,7 +715,7 @@ function App() {
     }, 10 * 60 * 1000); // 10 minutes
 
     return () => clearInterval(refreshInterval);
-  }, [currentLocation, pinnedLocations]);
+  }, []); // Empty dependency array to maintain consistent interval timing
 
   const handleLocationSelect = async (location: Location) => {
     setLoading(true);
@@ -730,6 +727,9 @@ function App() {
       const weatherData = await getWeatherData(location);
       setWeather(weatherData);
       setCurrentLocation(location);
+      
+      // Refresh all pinned locations to sync timestamps with the new search
+      refreshWeatherData(false, false);
     } catch (err) {
       setError('Failed to load weather data. Please try again.');
     } finally {
@@ -866,7 +866,7 @@ function App() {
                     onUnpin={() => unpinLocation(locationKey)}
                     formatTemperature={formatTemperature}
                     temperatureUnit={temperatureUnit}
-                    isCollapsed={collapsedCards[locationKey] ?? false}
+                    isCollapsed={collapsedCards[locationKey] ?? true}
                     onToggleCollapse={() => toggleCardCollapse(locationKey)}
                     forecastMode={forecastModes[locationKey] || 'hourly'}
                     onToggleForecastMode={() => toggleForecastMode(locationKey)}

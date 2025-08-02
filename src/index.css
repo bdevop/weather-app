@@ -976,6 +976,14 @@ body {
   transition: all 0.3s ease;
 }
 
+.weather-container.side-by-side .metric-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  text-align: center;
+}
+
 .weather-metrics.expanded .metric-item {
   transform: translateY(0);
   opacity: 1;

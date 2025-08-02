@@ -18,7 +18,7 @@ export interface WeatherData {
     windSpeed: number;
     windDirection: string;
     windDegree: number;
-    visibility: number;
+    airQuality: number;
     uvIndex: number;
     cloudCover: number;
     precipitation: number;

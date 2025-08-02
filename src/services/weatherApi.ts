@@ -33,7 +33,7 @@ export const searchLocations = async (query: string): Promise<Location[]> => {
 export const getWeatherData = async (location: Location): Promise<WeatherData> => {
   try {
     const response = await fetch(
-      `${BASE_URL}/forecast.json?key=${API_KEY}&q=${location.lat},${location.lon}&days=7&aqi=no&alerts=no`
+      `${BASE_URL}/forecast.json?key=${API_KEY}&q=${location.lat},${location.lon}&days=7&aqi=yes&alerts=no`
     );
     
     if (!response.ok) {
@@ -41,6 +41,7 @@ export const getWeatherData = async (location: Location): Promise<WeatherData> =
     }
     
     const data = await response.json();
+    
     
     
     const current = data.current;
@@ -98,7 +99,7 @@ export const getWeatherData = async (location: Location): Promise<WeatherData> =
         windSpeed: Math.round(current.wind_kph),
         windDirection: current.wind_dir,
         windDegree: current.wind_degree,
-        visibility: Math.round(current.vis_km),
+        airQuality: data.current.air_quality?.['us-epa-index'] || 0,
         uvIndex: current.uv,
         cloudCover: current.cloud,
         precipitation: current.precip_mm || 0,
