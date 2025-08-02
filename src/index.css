@@ -1105,7 +1105,7 @@ body {
   display: flex;
   gap: 1rem;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
+  padding: 2px 0 0.5rem 0;
   scrollbar-width: thin;
   scrollbar-color: var(--border-color) transparent;
 }
@@ -1132,7 +1132,8 @@ body {
   min-width: 150px;
   flex-shrink: 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
+  transform: translateY(0);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .forecast-item:hover {
@@ -1140,33 +1141,64 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
-/* Forecast item weather theming */
-.forecast-item.sunny {
+/* Forecast item weather theming - Priority for daily items */
+.forecast-item.daily-item.sunny {
+  background: var(--sunny-bg) !important;
+  border-color: var(--sunny-border) !important;
+}
+
+.forecast-item.daily-item.cloudy {
+  background: var(--cloudy-bg) !important;
+  border-color: var(--cloudy-border) !important;
+}
+
+.forecast-item.daily-item.rainy {
+  background: var(--rainy-bg) !important;
+  border-color: var(--rainy-border) !important;
+}
+
+.forecast-item.daily-item.stormy {
+  background: var(--stormy-bg) !important;
+  border-color: var(--stormy-border) !important;
+}
+
+.forecast-item.daily-item.snowy {
+  background: var(--snowy-bg) !important;
+  border-color: var(--snowy-border) !important;
+}
+
+.forecast-item.daily-item.foggy {
+  background: var(--foggy-bg) !important;
+  border-color: var(--foggy-border) !important;
+}
+
+/* Hourly forecast items keep time-based theming */
+.forecast-item:not(.daily-item).sunny {
   background: var(--sunny-bg);
   border-color: var(--sunny-border);
 }
 
-.forecast-item.cloudy {
+.forecast-item:not(.daily-item).cloudy {
   background: var(--cloudy-bg);
   border-color: var(--cloudy-border);
 }
 
-.forecast-item.rainy {
+.forecast-item:not(.daily-item).rainy {
   background: var(--rainy-bg);
   border-color: var(--rainy-border);
 }
 
-.forecast-item.stormy {
+.forecast-item:not(.daily-item).stormy {
   background: var(--stormy-bg);
   border-color: var(--stormy-border);
 }
 
-.forecast-item.snowy {
+.forecast-item:not(.daily-item).snowy {
   background: var(--snowy-bg);
   border-color: var(--snowy-border);
 }
 
-.forecast-item.foggy {
+.forecast-item:not(.daily-item).foggy {
   background: var(--foggy-bg);
   border-color: var(--foggy-border);
 }
@@ -1205,7 +1237,7 @@ body {
 .forecast-item.foggy.time-night { background: linear-gradient(135deg, var(--foggy-bg) 0%, var(--night-bg) 100%); border-color: var(--night-border); }
 
 .forecast-item.daily-item {
-  min-width: 180px;
+  min-width: 165px;
 }
 
 .forecast-time {
