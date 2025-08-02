@@ -128,22 +128,9 @@ body {
 }
 
 .title-accent {
-  font-weight: 300;
-  color: var(--text-secondary);
-  font-style: italic;
-  position: relative;
-}
-
-.title-accent::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--text-secondary), transparent);
-  border-radius: 1px;
-  opacity: 0.6;
+  font-weight: 400;
+  color: var(--text-muted);
+  font-style: normal;
 }
 
 .last-refresh {
