@@ -48,11 +48,16 @@ const getWeatherCondition = (conditionText: string) => {
 };
 
 const getTemperatureClass = (tempC: number) => {
-  if (tempC >= 30) return 'temp-hot';
-  if (tempC >= 20) return 'temp-warm';
-  if (tempC >= 10) return 'temp-mild';
-  if (tempC >= 0) return 'temp-cool';
-  return 'temp-cold';
+  if (tempC >= 38) return 'temp-scorching';    // 100°F+
+  if (tempC >= 32) return 'temp-very-hot';     // 90-99°F
+  if (tempC >= 27) return 'temp-hot';          // 80-89°F
+  if (tempC >= 21) return 'temp-warm';         // 70-79°F
+  if (tempC >= 16) return 'temp-pleasant';     // 60-69°F
+  if (tempC >= 10) return 'temp-mild';         // 50-59°F
+  if (tempC >= 4) return 'temp-cool';          // 40-49°F
+  if (tempC >= -1) return 'temp-cold';         // 30-39°F
+  if (tempC >= -7) return 'temp-very-cold';    // 20-29°F
+  return 'temp-freezing';                      // <20°F
 };
 
 const getTimeOfDay = (localTime: string, sunrise: string, sunset: string) => {

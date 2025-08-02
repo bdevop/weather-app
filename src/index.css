@@ -42,17 +42,27 @@
   --foggy-bg: #FBFBFB;
   --foggy-border: #F0F0F0;
   
-  /* Temperature Colors - Light Mode (Subtle) */
-  --temp-hot: #C57C53;
-  --temp-hot-bg: #FDF8F5;
-  --temp-warm: #C5A15A;
-  --temp-warm-bg: #FDFBF5;
-  --temp-mild: #7BA67D;
-  --temp-mild-bg: #F8FBF8;
-  --temp-cool: #5B94C5;
-  --temp-cool-bg: #F8FBFD;
-  --temp-cold: #6B79B8;
-  --temp-cold-bg: #F8F9FD;
+  /* Temperature Colors - Light Mode (10-Color Fire-to-Ice Gradient) */
+  --temp-scorching: #B22222;
+  --temp-scorching-bg: #FDF5F5;
+  --temp-very-hot: #FF4500;
+  --temp-very-hot-bg: #FFF8F5;
+  --temp-hot: #FF8C00;
+  --temp-hot-bg: #FFFAF5;
+  --temp-warm: #FFA500;
+  --temp-warm-bg: #FFFBF0;
+  --temp-pleasant: #FFD700;
+  --temp-pleasant-bg: #FFFEF0;
+  --temp-mild: #F0E68C;
+  --temp-mild-bg: #FEFEF5;
+  --temp-cool: #87CEEB;
+  --temp-cool-bg: #F8FCFE;
+  --temp-cold: #4682B4;
+  --temp-cold-bg: #F7FAFB;
+  --temp-very-cold: #5F9EA0;
+  --temp-very-cold-bg: #F7FBFB;
+  --temp-freezing: #008B8B;
+  --temp-freezing-bg: #F5FCFC;
   
   /* Interactive Colors (Subtle) */
   --pin-active: #C57C53;
@@ -131,17 +141,27 @@
   --foggy-bg: #1e1e1e;
   --foggy-border: #2a2a2a;
   
-  /* Temperature Colors - Dark Mode (Subtle) */
-  --temp-hot: #C57C53;
-  --temp-hot-bg: #221e1c;
-  --temp-warm: #C5A15A;
-  --temp-warm-bg: #221f1c;
-  --temp-mild: #7BA67D;
-  --temp-mild-bg: #1c221c;
-  --temp-cool: #5B94C5;
-  --temp-cool-bg: #1c1f23;
-  --temp-cold: #6B79B8;
-  --temp-cold-bg: #1c1e23;
+  /* Temperature Colors - Dark Mode (10-Color Fire-to-Ice Gradient) */
+  --temp-scorching: #B22222;
+  --temp-scorching-bg: #251a1a;
+  --temp-very-hot: #FF4500;
+  --temp-very-hot-bg: #251e1a;
+  --temp-hot: #FF8C00;
+  --temp-hot-bg: #25201a;
+  --temp-warm: #FFA500;
+  --temp-warm-bg: #25221a;
+  --temp-pleasant: #FFD700;
+  --temp-pleasant-bg: #25241a;
+  --temp-mild: #F0E68C;
+  --temp-mild-bg: #25241f;
+  --temp-cool: #87CEEB;
+  --temp-cool-bg: #1a2025;
+  --temp-cold: #4682B4;
+  --temp-cold-bg: #1c1f25;
+  --temp-very-cold: #5F9EA0;
+  --temp-very-cold-bg: #1c2325;
+  --temp-freezing: #008B8B;
+  --temp-freezing-bg: #1a2525;
   
   /* Interactive Colors - Dark Mode (Subtle) */
   --pin-active: #C57C53;
@@ -529,13 +549,25 @@ body {
   border-color: var(--foggy-border);
 }
 
-/* Temperature-based styling (Subtle) */
+/* Temperature-based styling (10-Color Fire-to-Ice Gradient) */
+.temperature.temp-scorching {
+  color: var(--temp-scorching);
+}
+
+.temperature.temp-very-hot {
+  color: var(--temp-very-hot);
+}
+
 .temperature.temp-hot {
   color: var(--temp-hot);
 }
 
 .temperature.temp-warm {
   color: var(--temp-warm);
+}
+
+.temperature.temp-pleasant {
+  color: var(--temp-pleasant);
 }
 
 .temperature.temp-mild {
@@ -548,6 +580,14 @@ body {
 
 .temperature.temp-cold {
   color: var(--temp-cold);
+}
+
+.temperature.temp-very-cold {
+  color: var(--temp-very-cold);
+}
+
+.temperature.temp-freezing {
+  color: var(--temp-freezing);
 }
 
 /* Time of Day Modifiers - Very Subtle */
@@ -1187,6 +1227,18 @@ body {
   margin-bottom: 0.5rem;
 }
 
+/* Apply temperature colors to forecast temps */
+.forecast-temp.temp-scorching { color: var(--temp-scorching); }
+.forecast-temp.temp-very-hot { color: var(--temp-very-hot); }
+.forecast-temp.temp-hot { color: var(--temp-hot); }
+.forecast-temp.temp-warm { color: var(--temp-warm); }
+.forecast-temp.temp-pleasant { color: var(--temp-pleasant); }
+.forecast-temp.temp-mild { color: var(--temp-mild); }
+.forecast-temp.temp-cool { color: var(--temp-cool); }
+.forecast-temp.temp-cold { color: var(--temp-cold); }
+.forecast-temp.temp-very-cold { color: var(--temp-very-cold); }
+.forecast-temp.temp-freezing { color: var(--temp-freezing); }
+
 .forecast-temp-range {
   display: flex;
   justify-content: center;
@@ -1205,6 +1257,18 @@ body {
   font-weight: 400;
   color: var(--text-secondary);
 }
+
+/* Apply temperature colors to high/low temps */
+.temp-high.temp-scorching, .temp-low.temp-scorching { color: var(--temp-scorching); }
+.temp-high.temp-very-hot, .temp-low.temp-very-hot { color: var(--temp-very-hot); }
+.temp-high.temp-hot, .temp-low.temp-hot { color: var(--temp-hot); }
+.temp-high.temp-warm, .temp-low.temp-warm { color: var(--temp-warm); }
+.temp-high.temp-pleasant, .temp-low.temp-pleasant { color: var(--temp-pleasant); }
+.temp-high.temp-mild, .temp-low.temp-mild { color: var(--temp-mild); }
+.temp-high.temp-cool, .temp-low.temp-cool { color: var(--temp-cool); }
+.temp-high.temp-cold, .temp-low.temp-cold { color: var(--temp-cold); }
+.temp-high.temp-very-cold, .temp-low.temp-very-cold { color: var(--temp-very-cold); }
+.temp-high.temp-freezing, .temp-low.temp-freezing { color: var(--temp-freezing); }
 
 .forecast-desc {
   font-size: 0.8rem;

@@ -69,13 +69,18 @@ Weather condition colors are adapted for dark backgrounds with appropriate contr
 
 Temperature ranges are color-coded for quick visual recognition:
 
-#### Light Mode
+#### Light Mode - 10-Color Fire-to-Ice Gradient
 ```css
---temp-hot: #C57C53      /* Hot (30°C+) - Warm brown */
---temp-warm: #C5A15A     /* Warm (20-29°C) - Golden brown */
---temp-mild: #7BA67D     /* Mild (10-19°C) - Muted green */
---temp-cool: #5B94C5     /* Cool (0-9°C) - Blue */
---temp-cold: #6B79B8     /* Cold (<0°C) - Blue-purple */
+--temp-scorching: #B22222    /* Scorching (100°F+ / 38°C+) - Deep Red */
+--temp-very-hot: #FF4500     /* Very Hot (90-99°F / 32-37°C) - Red-Orange */
+--temp-hot: #FF8C00          /* Hot (80-89°F / 27-31°C) - Orange */
+--temp-warm: #FFA500         /* Warm (70-79°F / 21-26°C) - Yellow-Orange */
+--temp-pleasant: #FFD700     /* Pleasant (60-69°F / 16-20°C) - Golden Yellow */
+--temp-mild: #F0E68C         /* Mild (50-59°F / 10-15°C) - Light Yellow */
+--temp-cool: #87CEEB         /* Cool (40-49°F / 4-9°C) - Sky Blue */
+--temp-cold: #4682B4         /* Cold (30-39°F / -1-3°C) - Steel Blue */
+--temp-very-cold: #5F9EA0    /* Very Cold (20-29°F / -7 to -2°C) - Cadet Blue */
+--temp-freezing: #008B8B     /* Freezing (<20°F / <-7°C) - Dark Cyan */
 ```
 
 #### Dark Mode
@@ -146,7 +151,7 @@ The app dynamically applies CSS classes based on weather data:
 
 1. **Weather Condition Classes**: `.sunny`, `.cloudy`, `.rainy`, `.stormy`, `.snowy`, `.foggy`
 2. **Time Period Classes**: `.time-dawn`, `.time-day`, `.time-dusk`, `.time-night`  
-3. **Temperature Classes**: `.temp-hot`, `.temp-warm`, `.temp-mild`, `.temp-cool`, `.temp-cold`
+3. **Temperature Classes**: `.temp-scorching`, `.temp-very-hot`, `.temp-hot`, `.temp-warm`, `.temp-pleasant`, `.temp-mild`, `.temp-cool`, `.temp-cold`, `.temp-very-cold`, `.temp-freezing`
 
 ### Priority System
 
@@ -179,11 +184,16 @@ const getTimeOfDay = (localTime, sunrise, sunset) => {
 #### Temperature Classification
 ```javascript
 const getTemperatureClass = (tempC) => {
-  if (tempC >= 30) return 'temp-hot';
-  if (tempC >= 20) return 'temp-warm';
-  if (tempC >= 10) return 'temp-mild';
-  if (tempC >= 0) return 'temp-cool';
-  return 'temp-cold';
+  if (tempC >= 38) return 'temp-scorching';    // 100°F+
+  if (tempC >= 32) return 'temp-very-hot';     // 90-99°F
+  if (tempC >= 27) return 'temp-hot';          // 80-89°F
+  if (tempC >= 21) return 'temp-warm';         // 70-79°F
+  if (tempC >= 16) return 'temp-pleasant';     // 60-69°F
+  if (tempC >= 10) return 'temp-mild';         // 50-59°F
+  if (tempC >= 4) return 'temp-cool';          // 40-49°F
+  if (tempC >= -1) return 'temp-cold';         // 30-39°F
+  if (tempC >= -7) return 'temp-very-cold';    // 20-29°F
+  return 'temp-freezing';                      // <20°F
 };
 ```
 
@@ -227,10 +237,22 @@ const getTemperatureClass = (tempC) => {
 
 ### Temperature Display
 ```css
-/* Hot temperature in any weather condition */
-.temperature.temp-hot {
-  color: var(--temp-hot);
+/* Pleasant temperature (60-69°F) in any weather condition */
+.temperature.temp-pleasant {
+  color: var(--temp-pleasant);
 }
+
+/* All 10 temperature classes available */
+.temperature.temp-scorching { color: var(--temp-scorching); }
+.temperature.temp-very-hot { color: var(--temp-very-hot); }
+.temperature.temp-hot { color: var(--temp-hot); }
+.temperature.temp-warm { color: var(--temp-warm); }
+.temperature.temp-pleasant { color: var(--temp-pleasant); }
+.temperature.temp-mild { color: var(--temp-mild); }
+.temperature.temp-cool { color: var(--temp-cool); }
+.temperature.temp-cold { color: var(--temp-cold); }
+.temperature.temp-very-cold { color: var(--temp-very-cold); }
+.temperature.temp-freezing { color: var(--temp-freezing); }
 ```
 
 ### Forecast Items
